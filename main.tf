@@ -47,6 +47,7 @@ resource "azurerm_kubernetes_cluster" "app" {
   }
 }
 
+
 resource "random_password" "sql_pass" {
   length  = 16
   special = true
@@ -110,6 +111,8 @@ resource "azurerm_role_assignment" "acr_app_role_api" {
   principal_id         = azurerm_kubernetes_cluster.app.kubelet_identity[0].object_id
   role_definition_name = "AcrPull"
 }
+
+data "azurerm_client_config" "current" {}
 resource "azurerm_key_vault" "app" {
   name                       = "kv-${local.name}"
   location                   = azurerm_resource_group.app.location
@@ -130,6 +133,6 @@ resource "azurerm_key_vault" "app" {
 
 resource "azurerm_key_vault_secret" "sql_connection" {
   name         = "sql-connection-string"
-  value        = "Server=tcp:${azurerm_mssql_server.app.fully_qualified_domain_name},1433;Database=${azurerm_mssql_database.app_db_1.name};User ID=${azurerm_mssql_server.app.administrator_login};Password=${random_password.sql_admin.result};Encrypt=true;Connection Timeout=30;"
+  value        = "Server=tcp:${azurerm_mssql_server.app-server-1.fully_qualified_domain_name},1433;Database=${azurerm_mssql_database.app-db-1.name};User ID=${azurerm_mssql_server.app-server-1.administrator_login};Password=${random_password.sql_pass.result};Encrypt=true;Connection Timeout=30;"
   key_vault_id = azurerm_key_vault.app.id
 }
