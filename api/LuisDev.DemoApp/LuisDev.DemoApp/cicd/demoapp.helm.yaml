@@ -1,0 +1,31 @@
+
+
+image:
+  repository: luisticktes.azurecr.io/luisticktes-api
+  pullPolicy: IfNotPresent
+  tag: "0"
+
+
+serviceAccount:
+  create: false
+
+service:
+  type: LoadBalancer
+  port: 80
+
+resources: 
+  limits:
+    cpu: 1000m
+    memory: 700Mi
+  requests:
+    cpu: 300m
+    memory: 400Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+#helm install demoapi -f ./api/LuisDev.DemoApp/LuisDev.DemoApp/cicd/demoapp.helm.yaml ./helm/app  --namespace=app

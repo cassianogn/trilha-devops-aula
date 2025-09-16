@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dgSpecHash": "Ksm5QJoRVjY=",
+  "success": true,
+  "projectFilePath": "C:\\projetos\\trabalho\\luisdev\\trilha-devops\\api\\LuisDev.DemoApp\\LuisDev.DemoApp\\LuisDev.DemoApp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Cassiano Nunes\\.nuget\\packages\\microsoft.extensions.apidescription.server\\6.0.5\\microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
+    "C:\\Users\\Cassiano Nunes\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
+    "C:\\Users\\Cassiano Nunes\\.nuget\\packages\\microsoft.visualstudio.azure.containers.tools.targets\\1.22.1\\microsoft.visualstudio.azure.containers.tools.targets.1.22.1.nupkg.sha512",
+    "C:\\Users\\Cassiano Nunes\\.nuget\\packages\\swashbuckle.aspnetcore\\6.5.0\\swashbuckle.aspnetcore.6.5.0.nupkg.sha512",
+    "C:\\Users\\Cassiano Nunes\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.5.0\\swashbuckle.aspnetcore.swagger.6.5.0.nupkg.sha512",
+    "C:\\Users\\Cassiano Nunes\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.5.0\\swashbuckle.aspnetcore.swaggergen.6.5.0.nupkg.sha512",
+    "C:\\Users\\Cassiano Nunes\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\6.5.0\\swashbuckle.aspnetcore.swaggerui.6.5.0.nupkg.sha512"
+  ],
+  "logs": []
+}
