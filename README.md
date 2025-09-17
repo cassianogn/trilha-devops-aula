@@ -59,3 +59,61 @@ Antes de executar, instale:
 
 ---
 Siga as próximas aulas para evoluir a automação e integração contínua da sua infraestrutura!
+
+
+--- Aula de AKS + helm
+
+## Trilha DevOps - Aula 2 de 4: Kubernetes + Helm
+
+Nesta segunda aula, evoluímos a infraestrutura criada anteriormente e passamos a publicar aplicações e ferramentas de observabilidade no AKS utilizando o Helm.
+
+### Pré-requisitos
+- Azure CLI: https://docs.microsoft.com/cli/azure/install-azure-cli
+- kubectl: https://kubernetes.io/docs/tasks/tools/
+- Helm: https://helm.sh/docs/intro/install/
+- Um cluster AKS e um Azure Container Registry (ACR) (podem ser provisionados pelo Terraform da aula anterior).
+
+### Conectando na Azure e no AKS
+```pwsh
+az login
+az acr login --name <acr-name>
+az aks get-credentials -g <resource-group> -n <nome-do-cluster>
+```
+
+### Criando Namespaces
+```pwsh
+kubectl create namespace app
+kubectl create namespace monitoring
+```
+
+### Publicando uma aplicação com Helm
+```pwsh
+# Criar um chart Helm
+helm create app
+
+# Renderizar manifests (pré-visualização)
+helm template demoapi -f ./api/LuisDev.DemoApp/LuisDev.DemoApp/cicd/demoapp.helm.yaml ./helm/app > saida.yaml
+
+# Instalar a aplicação
+helm install demoapi -f ./api/LuisDev.DemoApp/LuisDev.DemoApp/cicd/demoapp.helm.yaml ./helm/app --namespace=app
+
+# Atualizar a aplicação (exemplo alterando valor via --set)
+helm upgrade --set version=0 demoapi -f ./api/LuisDev.DemoApp/LuisDev.DemoApp/cicd/demoapp.helm.yaml ./helm/app --namespace=app
+```
+
+### Observabilidade: Prometheus e Grafana com Helm
+```pwsh
+# Adicionar repositórios oficiais
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add grafana https://grafana.github.io/helm-charts
+
+# Instalar Prometheus + Grafana
+helm install my-kube-prometheus-stack prometheus-community/kube-prometheus-stack --version 77.6.2 -n monitoring
+
+# Atualizar instalação (Grafana com LoadBalancer exposto publicamente)
+helm upgrade my-kube-prometheus-stack prometheus-community/kube-prometheus-stack -n monitoring --reuse-values --set grafana.service.type=LoadBalancer,grafana.service.port=80
+
+# Recuperar senha do Grafana (PowerShell)
+kubectl get secret -n monitoring my-kube-prometheus-stack-grafana `
+  -o jsonpath="{.data.admin-password}" | %{[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_))}
+```
