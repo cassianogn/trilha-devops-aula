@@ -5,59 +5,47 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  ENV: 'dev'
-  TFVARS_PATH: 'terraform/envs/$(ENV).tfvars'
+  ENV: 'dev'                                   # dev | prod
   TF_WORKDIR: 'terraform'
+  TFVARS_PATH: 'terraform/envs/$(ENV).tfvars'
+  TF_BACKEND_FILE: 'terraform/backend/backend.$(ENV).hcl'
 
 steps:
 - checkout: self
 
-- task: AzureCLI@2
-  displayName: 'Login Azure (Service Connection)'
-  inputs:
-    azureSubscription: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
-    scriptType: bash
-    scriptLocation: inlineScript
-    inlineScript: |
-      # apenas para verificar login
-      az account show
 
-- task: Bash@3
-  displayName: 'Instalar Terraform'
+- task: TerraformInstaller@1
   inputs:
-    targetType: 'inline'
-    script: |
-      curl -fsSL https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip -o tf.zip
-      sudo unzip -o tf.zip -d /usr/local/bin
-      terraform -version
+    terraformVersion: '1.6.6'
 
-- task: AzureCLI@2
+# INIT usando seu .hcl
+- task: TerraformTask@5
   displayName: 'Terraform init (backend.hcl)'
   inputs:
-    azureSubscription: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
-    scriptType: bash
-    scriptLocation: inlineScript
+    provider: 'azurerm'
+    command: 'init'
     workingDirectory: '$(TF_WORKDIR)'
-    inlineScript: |
-      terraform init -backend-config=backend/backend.$(ENV).hcl -upgrade
+    backendServiceArm: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
+    commandOptions: '-backend-config=$(TF_BACKEND_FILE) -upgrade'
+    # ^ usa a mesma Service Connection para autenticar o backend
 
-- task: AzureCLI@2
+# PLAN lendo o tfvars
+- task: TerraformTask@5
   displayName: 'Terraform plan'
   inputs:
-    azureSubscription: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
-    scriptType: bash
-    scriptLocation: inlineScript
+    provider: 'azurerm'
+    command: 'plan'
     workingDirectory: '$(TF_WORKDIR)'
-    inlineScript: |
-      terraform plan -out=tfplan \
-        -var-file="$(TFVARS_PATH)"
+    environmentServiceNameAzureRM: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
+    commandOptions: '-var-file=$(TFVARS_PATH)'
+    publishPlanResults: 'terraformPlan'
 
-# - task: AzureCLI@2
+# APPLY (opcional)
+# - task: TerraformTask@5
 #   displayName: 'Terraform apply'
 #   inputs:
-#     azureSubscription: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
-#     scriptType: bash
-#     scriptLocation: inlineScript
+#     provider: 'azurerm'
+#     command: 'apply'
 #     workingDirectory: '$(TF_WORKDIR)'
-#     inlineScript: |
-#       terraform apply -auto-approve tfplan
+#     environmentServiceNameAzureRM: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
+#     commandOptions: '-auto-approve'
