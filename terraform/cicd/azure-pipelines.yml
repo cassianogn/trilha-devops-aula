@@ -49,14 +49,15 @@ steps:
     scriptLocation: inlineScript
     workingDirectory: '$(TF_WORKDIR)'
     inlineScript: |
-      terraform plan -out=tfplan -var "node_count=$(NODE_COUNT)"
+      terraform plan -out=tfplan \
+        -var-file="$(TFVARS_PATH)"
 
-- task: AzureCLI@2
-  displayName: 'Terraform apply'
-  inputs:
-    azureSubscription: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
-    scriptType: bash
-    scriptLocation: inlineScript
-    workingDirectory: '$(TF_WORKDIR)'
-    inlineScript: |
-      terraform apply -auto-approve tfplan
+# - task: AzureCLI@2
+#   displayName: 'Terraform apply'
+#   inputs:
+#     azureSubscription: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
+#     scriptType: bash
+#     scriptLocation: inlineScript
+#     workingDirectory: '$(TF_WORKDIR)'
+#     inlineScript: |
+#       terraform apply -auto-approve tfplan
