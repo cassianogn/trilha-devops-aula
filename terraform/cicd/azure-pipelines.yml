@@ -1,0 +1,62 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  ENV: 'dev'
+  TFVARS_PATH: 'terraform/envs/$(ENV).tfvars'
+  TF_WORKDIR: '.'
+
+steps:
+- checkout: self
+
+- task: AzureCLI@2
+  displayName: 'Login Azure (Service Connection)'
+  inputs:
+    azureSubscription: 'sc-azure'
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      # apenas para verificar login
+      az account show
+
+- task: Bash@3
+  displayName: 'Instalar Terraform'
+  inputs:
+    targetType: 'inline'
+    script: |
+      curl -fsSL https://releases.hashicorp.com/terraform/1.6.6/terraform_1.6.6_linux_amd64.zip -o tf.zip
+      sudo unzip -o tf.zip -d /usr/local/bin
+      terraform -version
+
+- task: AzureCLI@2
+  displayName: 'Terraform init (backend.hcl)'
+  inputs:
+    azureSubscription: 'sc-azure'
+    scriptType: bash
+    scriptLocation: inlineScript
+    workingDirectory: '$(TF_WORKDIR)'
+    inlineScript: |
+      terraform init -backend-config=backend/$(ENV).hcl -upgrade
+
+- task: AzureCLI@2
+  displayName: 'Terraform plan'
+  inputs:
+    azureSubscription: 'sc-azure'
+    scriptType: bash
+    scriptLocation: inlineScript
+    workingDirectory: '$(TF_WORKDIR)'
+    inlineScript: |
+      terraform plan -out=tfplan -var "node_count=$(NODE_COUNT)"
+
+- task: AzureCLI@2
+  displayName: 'Terraform apply'
+  inputs:
+    azureSubscription: 'sc-azure'
+    scriptType: bash
+    scriptLocation: inlineScript
+    workingDirectory: '$(TF_WORKDIR)'
+    inlineScript: |
+      terraform apply -auto-approve tfplan
