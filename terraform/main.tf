@@ -1,7 +1,7 @@
 terraform {
   required_version = "~> 1.0"
 
-  
+  backend "azurerm" {}
   required_providers {
     azapi = {
       source  = "azure/azapi"
@@ -11,13 +11,13 @@ terraform {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 3.0"
-    }
+    }    
   }
 }
 
 locals {
   location = "Canada East"
-  name     = "luis-ticktes"
+  name     = "luis-tickts"
 }
 
 provider "azurerm" {
@@ -107,7 +107,7 @@ resource "azurerm_container_registry" "acr" {
 }
 
 resource "azurerm_role_assignment" "acr_app_role_api" {
-  scope                = azurerm_container_registry.acr.idsdasdsa
+  scope                = azurerm_container_registry.acr.id
   principal_id         = azurerm_kubernetes_cluster.app.kubelet_identity[0].object_id
   role_definition_name = "AcrPull"
 }
