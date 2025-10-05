@@ -7,7 +7,7 @@ pool:
 variables:
   ENV: 'dev'
   TFVARS_PATH: 'terraform/envs/$(ENV).tfvars'
-  TF_WORKDIR: '.'
+  TF_WORKDIR: 'terraform'
 
 steps:
 - checkout: self
@@ -39,7 +39,7 @@ steps:
     scriptLocation: inlineScript
     workingDirectory: '$(TF_WORKDIR)'
     inlineScript: |
-      terraform init -backend-config=backend/$(ENV).hcl -upgrade
+      terraform init -backend-config=backend/backend.$(ENV).hcl -upgrade
 
 - task: AzureCLI@2
   displayName: 'Terraform plan'
