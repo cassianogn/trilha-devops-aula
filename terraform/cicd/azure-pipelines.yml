@@ -18,19 +18,31 @@ steps:
     terraformVersion: '1.6.6'
 
 
-- task: TerraformTask@5
-  displayName: 'Terraform init'
+- task: AzureCLI@2
+  displayName: 'Terraform init (AzureCLI + ARM_*)'
   inputs:
-    provider: 'azurerm'
-    command: 'init'
+    azureSubscription: 'subcription laboratorio'  # sua nova SC (corrija o nome se tiver typo)
+    addSpnToEnvironment: true
+    scriptType: bash
     workingDirectory: '$(TF_WORKDIR)'
-    backendServiceArm: 'subcription laboratorio'
-    environmentServiceNameAzureRM: 'subcription laboratorio'
-    backendAzureRmResourceGroupName: 'laboratorio'
-    backendAzureRmStorageAccountName: 'aulasluis'
-    backendAzureRmContainerName: 'dev'
-    backendAzureRmKey: 'aks/terraform.tfstate'
-    
+    scriptLocation: inlineScript
+    inlineScript: |
+      set -e
+      # Exporta ARM_* a partir da Service Connection
+      export ARM_CLIENT_ID="$servicePrincipalId"
+      export ARM_CLIENT_SECRET="$servicePrincipalKey"
+      export ARM_TENANT_ID="$tenantId"
+      export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+      export ARM_SKIP_PROVIDER_REGISTRATION=true
+
+      # Se estiver usando AAD no backend, MANTENHA use_azuread_auth=true.
+      terraform init \
+        -backend-config="resource_group_name=laboratorio" \
+        -backend-config="storage_account_name=aulasluis" \
+        -backend-config="container_name=dev" \
+        -backend-config="key=aks/terraform.tfstate" \
+        -backend-config="use_azuread_auth=true" \
+        -upgrade
 # PLAN lendo o tfvars
 - task: TerraformTask@5
   displayName: 'Terraform plan'
