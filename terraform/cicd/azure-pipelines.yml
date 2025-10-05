@@ -18,7 +18,6 @@ steps:
     terraformVersion: '1.6.6'
 
 
-# INIT usando seu .hcl
 - task: TerraformTask@5
   displayName: 'Terraform init'
   inputs:
@@ -30,9 +29,7 @@ steps:
     backendAzureRmStorageAccountName: 'aulasluis'
     backendAzureRmContainerName: 'dev'
     backendAzureRmKey: 'aks/terraform.tfstate'
-
-    # ^ usa a mesma Service Connection para autenticar o backend
-
+    
 # PLAN lendo o tfvars
 - task: TerraformTask@5
   displayName: 'Terraform plan'
