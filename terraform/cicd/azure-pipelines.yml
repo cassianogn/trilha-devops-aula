@@ -25,8 +25,10 @@ steps:
     provider: 'azurerm'
     command: 'init'
     workingDirectory: '$(TF_WORKDIR)'
-    backendServiceArm: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
+    backendType: 'selfConfigured'
+    environmentServiceNameAzureRM: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)' # exporta ARM_* p/ SP
     commandOptions: '-backend-config=$(TF_BACKEND_FILE) -upgrade'
+
     # ^ usa a mesma Service Connection para autenticar o backend
 
 # PLAN lendo o tfvars
