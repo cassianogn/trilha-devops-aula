@@ -19,19 +19,8 @@ steps:
 
 
 # INIT usando seu .hcl
-
-# - task: TerraformTask@5
-#   displayName: 'Terraform init'
-#   inputs:
-#     provider: 'azurerm'
-#     command: 'init'
-#     workingDirectory: '$(TF_WORKDIR)'
-#     backendServiceArm: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
-#     backendAzureRmStorageAccountName: 'aulasluis'
-#     backendAzureRmContainerName: 'dev'
-#     backendAzureRmKey: ''
-
 - task: TerraformTask@5
+  displayName: 'Terraform init'
   inputs:
     provider: 'azurerm'
     command: 'init'
