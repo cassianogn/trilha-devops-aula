@@ -8,7 +8,6 @@ variables:
   ENV: 'dev'                                   # dev | prod
   TF_WORKDIR: 'terraform'
   TFVARS_PATH: 'terraform/envs/$(ENV).tfvars'
-  TF_BACKEND_FILE: 'terraform/backend/backend.$(ENV).hcl'
 
 steps:
 - checkout: self
@@ -18,16 +17,18 @@ steps:
   inputs:
     terraformVersion: '1.6.6'
 
+
 # INIT usando seu .hcl
 - task: TerraformTask@5
-  displayName: 'Terraform init (backend.hcl)'
+  displayName: 'Terraform init'
   inputs:
     provider: 'azurerm'
     command: 'init'
     workingDirectory: '$(TF_WORKDIR)'
-    backendType: 'selfConfigured'
-    environmentServiceNameAzureRM: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)' # exporta ARM_* p/ SP
-    commandOptions: '-backend-config=$(TF_BACKEND_FILE) -upgrade'
+    backendServiceArm: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
+    backendAzureRmStorageAccountName: 'aulasluis'
+    backendAzureRmContainerName: 'dev'
+    backendAzureRmKey: 'aks/terraform.tfstate'
 
     # ^ usa a mesma Service Connection para autenticar o backend
 
