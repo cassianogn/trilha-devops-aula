@@ -25,6 +25,7 @@ steps:
     command: 'init'
     workingDirectory: '$(TF_WORKDIR)'
     backendServiceArm: 'subcription laboratorio'
+    environmentServiceNameAzureRM: 'subcription laboratorio'
     backendAzureRmResourceGroupName: 'laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
     backendAzureRmContainerName: 'dev'
