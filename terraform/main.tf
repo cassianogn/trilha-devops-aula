@@ -1,7 +1,12 @@
 terraform {
   required_version = "~> 1.0"
 
-  backend "azurerm" {}
+  backend "azurerm" {
+    resource_group_name = "value"
+    storage_account_name = "value"
+    container_name = "value"
+    key = "value"
+  }
   required_providers {
     azapi = {
       source  = "azure/azapi"
