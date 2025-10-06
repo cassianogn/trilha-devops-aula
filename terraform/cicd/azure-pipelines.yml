@@ -53,8 +53,8 @@ steps:
     backendServiceArm: 'subcription laboratorio'     # <— sua SC
     backendAzureRmResourceGroupName: 'laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
-    backendAzureRmContainerName: 'tfstate'
-    backendAzureRmKey: 'envs/$(ENV)/terraform.tfstate'
+    backendAzureRmContainerName: '$(ENV)'
+    backendAzureRmKey: 'terraform.tfstate'
     # Auth do backend via Access Key (vinda do Variable Group)
     commandOptions: '-backend-config=access_key=$(STORAGE_KEY) -upgrade'
 
