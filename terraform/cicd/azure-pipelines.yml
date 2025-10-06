@@ -39,7 +39,7 @@ steps:
     provider: 'azurerm'
     command: 'init'
     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-    backendServiceArm: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
+    backendServiceArm: 'subcription laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
     backendAzureRmContainerName: 'dev'
     backendAzureRmKey: 'terraform.tfstate'
