@@ -6,7 +6,7 @@ pool:
 
 variables:
   ENV: 'dev'                                   # dev | prod
-  TF_WORKDIR: 'terraform'
+  TF_WORKDIR: '$(System.DefaultWorkingDirectory)/terraform'
   TFVARS_PATH: 'terraform/envs/$(ENV).tfvars'
 
 steps:
