@@ -24,11 +24,15 @@ steps:
     provider: 'azurerm'
     command: 'init'
     workingDirectory: '$(TF_WORKDIR)'
+
+    # MESMA Service Connection para backend e provider:
     backendServiceArm: 'subcription laboratorio'
+    environmentServiceNameAzureRM: 'subcription laboratorio'
+
     backendAzureRmResourceGroupName: 'laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
-    backendAzureRmContainerName: 'dev'
-    backendAzureRmKey: 'terraform.tfstate'
+    backendAzureRmContainerName: 'tfstate'
+    backendAzureRmKey: 'envs/dev/terraform.tfstate'
 
 # PLAN lendo o tfvars
 # - task: TerraformTask@5
