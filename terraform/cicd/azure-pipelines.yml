@@ -5,14 +5,12 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-- group: 'trilha-devops'
-
 - name: ENV
   value: 'dev'
 - name: TF_WORKDIR
   value: '$(System.DefaultWorkingDirectory)/terraform'
 - name: TFVARS_PATH
-  value: 'envs/$(ENV).tfvars'   # <-- era 'terraform/envs/...', ajuste aqui
+  value: 'envs/$(ENV).tfvars'   # relativo ao TF_WORKDIR
 
 steps:
 - checkout: self
@@ -21,35 +19,38 @@ steps:
   inputs:
     terraformVersion: '1.6.6'
 
+# INIT (usa AAD/OIDC via Service Connection; sem access key)
 - task: TerraformTask@5
-  displayName: 'Terraform init (access key)'
+  displayName: 'Terraform init (AAD/OIDC)'
   inputs:
     provider: 'azurerm'
     command: 'init'
     workingDirectory: '$(TF_WORKDIR)'
-    # A task exige uma Service Connection para backend:
-    backendServiceArm: 'subcription laboratorio'     # <— sua SC
-    backendAzureRmResourceGroupName: 'laboratorio'
-    backendAzureRmStorageAccountName: 'aulasluis'
-    backendAzureRmContainerName: '$(ENV)'
-    backendAzureRmKey: 'terraform.tfstate'
-    # Auth do backend via Access Key (vinda do Variable Group)
-    commandOptions: '-backend-config=access_key=$(STORAGE_KEY) -upgrade'
+    # use a MESMA Service Connection nas duas linhas abaixo:
+    backendServiceArm: 'subcription laboratorio'
+    environmentServiceNameAzureRM: 'subcription laboratorio'
+    # se você deixou o backend configurado no código, não precisa passar nada aqui.
+    # (opcional) se preferir passar aqui:
+    # backendAzureRmResourceGroupName: 'laboratorio'
+    # backendAzureRmStorageAccountName: 'aulasluis'
+    # backendAzureRmContainerName: 'tfstate'
+    # backendAzureRmKey: 'envs/$(ENV)/terraform.tfstate'
 
+# PLAN
 - task: TerraformTask@5
   displayName: 'Terraform plan'
   inputs:
     provider: 'azurerm'
     command: 'plan'
     workingDirectory: '$(TF_WORKDIR)'
-    environmentServiceNameAzureRM: 'subcription laboratorio'   # mesma SC
+    environmentServiceNameAzureRM: 'subcription laboratorio'
     commandOptions: >
       -var-file=$(TFVARS_PATH)
       -input=false
       -out=tfplan
-    publishPlanResults: 'terraformPlan'  # opcional: anexa o plano no job
+    publishPlanResults: 'terraformPlan'
 
-# APPLY usando o plano gerado
+# APPLY
 - task: TerraformTask@5
   displayName: 'Terraform apply'
   inputs:
