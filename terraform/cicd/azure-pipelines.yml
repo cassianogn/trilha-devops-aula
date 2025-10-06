@@ -25,11 +25,10 @@ steps:
     command: 'init'
     workingDirectory: '$(TF_WORKDIR)'
     backendServiceArm: 'subcription laboratorio'
-    environmentServiceNameAzureRM: 'subcription laboratorio'
     backendAzureRmResourceGroupName: 'laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
     backendAzureRmContainerName: 'dev'
-    backendAzureRmKey: 'aks/terraform.tfstate'
+    backendAzureRmKey: 'terraform.tfstate'
 
 # PLAN lendo o tfvars
 # - task: TerraformTask@5
