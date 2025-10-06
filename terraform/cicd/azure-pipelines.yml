@@ -4,45 +4,23 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-
 variables:
-# 1) Linka o Variable Group que contém STORAGE_KEY
 - group: 'trilha-devops'
 
-# 2) Suas vars locais
 - name: ENV
   value: 'dev'
 - name: TF_WORKDIR
   value: '$(System.DefaultWorkingDirectory)/terraform'
-# Se o workingDirectory é a pasta "terraform", o var-file fica relativo a ela:
 - name: TFVARS_PATH
   value: 'envs/$(ENV).tfvars'   # <-- era 'terraform/envs/...', ajuste aqui
 
-
 steps:
 - checkout: self
-
 
 - task: TerraformInstaller@1
   inputs:
     terraformVersion: '1.6.6'
 
-
-# - task: TerraformTask@5
-#   displayName: 'Terraform init'
-#   inputs:
-#     provider: 'azurerm'
-#     command: 'init'
-#     workingDirectory: '$(TF_WORKDIR)'
-
-#     # MESMA Service Connection para backend e provider:
-#     backendServiceArm: 'subcription laboratorio'
-#     environmentServiceNameAzureRM: 'subcription laboratorio'
-
-#     backendAzureRmResourceGroupName: 'laboratorio'
-#     backendAzureRmStorageAccountName: 'aulasluis'
-#     backendAzureRmContainerName: 'tfstate'
-#     backendAzureRmKey: 'envs/dev/terraform.tfstate'
 - task: TerraformTask@5
   displayName: 'Terraform init (access key)'
   inputs:
@@ -58,23 +36,28 @@ steps:
     # Auth do backend via Access Key (vinda do Variable Group)
     commandOptions: '-backend-config=access_key=$(STORAGE_KEY) -upgrade'
 
-# PLAN lendo o tfvars
-# - task: TerraformTask@5
-#   displayName: 'Terraform plan'
-#   inputs:
-#     provider: 'azurerm'
-#     command: 'plan'
-#     workingDirectory: '$(TF_WORKDIR)'
-#     environmentServiceNameAzureRM: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
-#     commandOptions: '-var-file=$(TFVARS_PATH)'
-#     publishPlanResults: 'terraformPlan'
+- task: TerraformTask@5
+  displayName: 'Terraform plan'
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    workingDirectory: '$(TF_WORKDIR)'
+    environmentServiceNameAzureRM: 'subcription laboratorio'   # mesma SC
+    commandOptions: >
+      -var-file=$(TFVARS_PATH)
+      -input=false
+      -out=tfplan
+    publishPlanResults: 'terraformPlan'  # opcional: anexa o plano no job
 
-# APPLY (opcional)
-# - task: TerraformTask@5
-#   displayName: 'Terraform apply'
-#   inputs:
-#     provider: 'azurerm'
-#     command: 'apply'
-#     workingDirectory: '$(TF_WORKDIR)'
-#     environmentServiceNameAzureRM: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
-#     commandOptions: '-auto-approve'
+# APPLY usando o plano gerado
+- task: TerraformTask@5
+  displayName: 'Terraform apply'
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    workingDirectory: '$(TF_WORKDIR)'
+    environmentServiceNameAzureRM: 'subcription laboratorio'
+    commandOptions: >
+      -input=false
+      -auto-approve
+      tfplan
