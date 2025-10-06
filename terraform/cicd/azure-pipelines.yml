@@ -34,15 +34,18 @@ steps:
 #     backendAzureRmContainerName: 'tfstate'
 #     backendAzureRmKey: 'envs/dev/terraform.tfstate'
 - task: TerraformTask@5
-  displayName: 'Terraform init'
+  displayName: 'Terraform init (access key)'
   inputs:
     provider: 'azurerm'
     command: 'init'
-    workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-    backendServiceArm: 'subcription laboratorio'
+    workingDirectory: 'terraform'
+    # esses campos só ajudam a montar o comando; a auth vem pela access_key:
+    backendAzureRmResourceGroupName: 'laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
-    backendAzureRmContainerName: 'dev'
-    backendAzureRmKey: 'terraform.tfstate'
+    backendAzureRmContainerName: 'tfstate'
+    backendAzureRmKey: 'envs/dev/terraform.tfstate'
+    # passa a access key via commandOptions
+    commandOptions: '-backend-config=access_key=$(STORAGE_KEY) -upgrade'
 
 # PLAN lendo o tfvars
 # - task: TerraformTask@5
