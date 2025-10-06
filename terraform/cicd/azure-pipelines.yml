@@ -30,7 +30,7 @@ steps:
     environmentServiceNameAzureRM: 'subcription laboratorio'
     backendAzureRmResourceGroupName: 'laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
-    backendAzureRmContainerName: 'tfstate'                # use o que padronizou
+    backendAzureRmContainerName: 'dev'                # use o que padronizou
     backendAzureRmKey: 'envs/$(ENV)/terraform.tfstate' 
 
 # PLAN
