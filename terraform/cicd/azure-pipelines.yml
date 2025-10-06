@@ -48,13 +48,14 @@ steps:
   inputs:
     provider: 'azurerm'
     command: 'init'
-    workingDirectory: 'terraform'
-    # esses campos só ajudam a montar o comando; a auth vem pela access_key:
+    workingDirectory: '$(TF_WORKDIR)'
+    # A task exige uma Service Connection para backend:
+    backendServiceArm: 'subcription laboratorio'     # <— sua SC
     backendAzureRmResourceGroupName: 'laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
     backendAzureRmContainerName: 'tfstate'
-    backendAzureRmKey: 'envs/dev/terraform.tfstate'
-    # passa a access key via commandOptions
+    backendAzureRmKey: 'envs/$(ENV)/terraform.tfstate'
+    # Auth do backend via Access Key (vinda do Variable Group)
     commandOptions: '-backend-config=access_key=$(STORAGE_KEY) -upgrade'
 
 # PLAN lendo o tfvars
