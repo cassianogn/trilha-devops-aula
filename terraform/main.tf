@@ -2,11 +2,13 @@ terraform {
   required_version = "~> 1.0"
 
   backend "azurerm" {
-    resource_group_name = "laboratorio"
+    resource_group_name  = "laboratorio"
     storage_account_name = "aulasluis"
-    container_name = "dev"
-    key = "terraform.tfstate"
+    container_name       = "dev"                    
+    key                  = "envs/dev/terraform.tfstate"
+    use_azuread_auth     = true
   }
+
   required_providers {
     azapi = {
       source  = "azure/azapi"
@@ -16,7 +18,7 @@ terraform {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 3.0"
-    }    
+    }
   }
 }
 
@@ -27,8 +29,8 @@ locals {
 
 provider "azurerm" {
   features {}
+  use_oidc = true
 }
-
 resource "azurerm_resource_group" "app" {
   location = local.location
   name     = local.name
