@@ -4,10 +4,20 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
+
 variables:
-  ENV: 'dev'                                   # dev | prod
-  TF_WORKDIR: '$(System.DefaultWorkingDirectory)/terraform'
-  TFVARS_PATH: 'terraform/envs/$(ENV).tfvars'
+# 1) Linka o Variable Group que contém STORAGE_KEY
+- group: 'trilha-devops'
+
+# 2) Suas vars locais
+- name: ENV
+  value: 'dev'
+- name: TF_WORKDIR
+  value: '$(System.DefaultWorkingDirectory)/terraform'
+# Se o workingDirectory é a pasta "terraform", o var-file fica relativo a ela:
+- name: TFVARS_PATH
+  value: 'envs/$(ENV).tfvars'   # <-- era 'terraform/envs/...', ajuste aqui
+
 
 steps:
 - checkout: self
