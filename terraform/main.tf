@@ -2,10 +2,10 @@ terraform {
   required_version = "~> 1.0"
 
   backend "azurerm" {
-    resource_group_name = "value"
-    storage_account_name = "value"
-    container_name = "value"
-    key = "value"
+    resource_group_name = "laboratorio"
+    storage_account_name = "aulasluis"
+    container_name = "dev"
+    key = "terraform.tfstate"
   }
   required_providers {
     azapi = {
