@@ -111,7 +111,6 @@ resource "azurerm_role_assignment" "acr_app_role_api" {
   principal_id         = azurerm_kubernetes_cluster.app.kubelet_identity[0].object_id
   role_definition_name = "AcrPull"
 }
-
 # data "azurerm_client_config" "current" {}
 # resource "azurerm_key_vault" "app" {
 #   name                       = "kv-${local.name}"
