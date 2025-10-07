@@ -68,20 +68,20 @@ steps:
         -detailed-exitcode
 
 # APPLY consumindo o plano
-- task: AzureCLI@2
-  displayName: 'Terraform apply (OIDC via ARM_*)'
-  inputs:
-    azureSubscription: 'subcription laboratorio'
-    addSpnToEnvironment: true
-    scriptType: bash
-    workingDirectory: '$(TF_WORKDIR)'
-    scriptLocation: inlineScript
-    inlineScript: |
-      set -e
-      export ARM_CLIENT_ID="$servicePrincipalId"
-      export ARM_TENANT_ID="$tenantId"
-      export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
-      export ARM_USE_OIDC=true
-      export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
+# - task: AzureCLI@2
+#   displayName: 'Terraform apply (OIDC via ARM_*)'
+#   inputs:
+#     azureSubscription: 'subcription laboratorio'
+#     addSpnToEnvironment: true
+#     scriptType: bash
+#     workingDirectory: '$(TF_WORKDIR)'
+#     scriptLocation: inlineScript
+#     inlineScript: |
+#       set -e
+#       export ARM_CLIENT_ID="$servicePrincipalId"
+#       export ARM_TENANT_ID="$tenantId"
+#       export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+#       export ARM_USE_OIDC=true
+#       export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
 
-      terraform apply -input=false -auto-approve tfplan
+#       terraform apply -input=false -auto-approve tfplan
