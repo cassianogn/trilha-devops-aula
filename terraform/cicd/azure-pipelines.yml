@@ -20,42 +20,52 @@ steps:
     terraformVersion: '1.6.6'
 
 # INIT (usa AAD/OIDC via Service Connection; sem access key)
+
+# - task: TerraformTask@5
+#   displayName: 'Terraform init (AAD/OIDC)'
+#   inputs:
+#     provider: azurerm
+#     command: init
+#     workingDirectory: $(TF_WORKDIR)
+#     backendServiceArm: 'subcription laboratorio'
+#     environmentServiceNameAzureRM: 'subcription laboratorio'
+#     backendAzureRmResourceGroupName: 'laboratorio'
+#     backendAzureRmStorageAccountName: 'aulasluis'
+#     backendAzureRmContainerName: 'dev'                # use o que padronizou
+#     backendAzureRmKey: 'envs/$(ENV)/'
 - task: TerraformTask@5
-  displayName: 'Terraform init (AAD/OIDC)'
   inputs:
-    provider: azurerm
-    command: init
-    workingDirectory: $(TF_WORKDIR)
+    provider: 'azurerm'
+    command: 'init'
+    workingDirectory: '$(TF_WORKDIR)'
     backendServiceArm: 'subcription laboratorio'
-    environmentServiceNameAzureRM: 'subcription laboratorio'
-    backendAzureRmResourceGroupName: 'laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
-    backendAzureRmContainerName: 'dev'                # use o que padronizou
-    backendAzureRmKey: 'envs/$(ENV)/terraform.tfstate' 
+    backendAzureRmContainerName: 'dev'
+    backendAzureRmKey: 'final/terraform.tfstate'
 
 # PLAN
-- task: TerraformTask@5
-  displayName: 'Terraform plan'
-  inputs:
-    provider: 'azurerm'
-    command: 'plan'
-    workingDirectory: '$(TF_WORKDIR)'
-    environmentServiceNameAzureRM: 'subcription laboratorio'
-    commandOptions: >
-      -var-file=$(TFVARS_PATH)
-      -input=false
-      -out=tfplan
-    publishPlanResults: 'terraformPlan'
+# - task: TerraformTask@5
+#   displayName: 'Terraform plan'
+#   inputs:
+#     provider: 'azurerm'
+#     command: 'plan'
+#     workingDirectory: '$(TF_WORKDIR)'
+#     environmentServiceNameAzureRM: 'subcription laboratorio'
+#     commandOptions: >
+#       -var-file=$(TFVARS_PATH)
+#       -input=false
+#       -out=tfplan
+#     publishPlanResults: 'terraformPlan'
 
-# APPLY
-- task: TerraformTask@5
-  displayName: 'Terraform apply'
-  inputs:
-    provider: 'azurerm'
-    command: 'apply'
-    workingDirectory: '$(TF_WORKDIR)'
-    environmentServiceNameAzureRM: 'subcription laboratorio'
-    commandOptions: >
-      -input=false
-      -auto-approve
-      tfplan
+# # APPLY
+# - task: TerraformTask@5
+#   displayName: 'Terraform apply'
+#   inputs:
+#     provider: 'azurerm'
+#     command: 'apply'
+#     workingDirectory: '$(TF_WORKDIR)'
+#     environmentServiceNameAzureRM: 'subcription laboratorio'
+#     commandOptions: >
+#       -input=false
+#       -auto-approve
+#       tfplan
