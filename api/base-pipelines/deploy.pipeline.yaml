@@ -2,16 +2,15 @@ parameters:
   - name: image_name
     type: string
   - name: dockerfile
-    type: string
-  
+    type: string  
   - name: release_name
     type: string
   - name: chart_path
     type: string
   - name: values_file
     type: string
-  - name: k8s_namespace
-    type: string
+  - name: envs
+    type: object
 
 stages:
   - stage: build
@@ -40,31 +39,36 @@ stages:
               tags: |
                 $(Build.BuildId)
                 latest
-  - stage: deploy
-    displayName: Deploy
-    pool:
-      vmImage: "ubuntu-latest"
-    jobs:
-      - job: deploy
-        displayName: Deploy
-        steps:
-          - task: HelmInstaller@1
-            displayName: "Install Helm 3"
-            inputs:
-              helmVersionToInstall: "3.13.3"
+  - ${{ each env in parameters.envs }}:              
+    - stage: deploy_${{env}}
+      displayName: Deploy ${{env}}
+      pool:
+        vmImage: "ubuntu-latest"
+      jobs:
+        - deployment: deploy_${{env}}
+          displayName: Deploy ${{env}}
+          environment: ${{env}}
+          strategy: 
+            runOnce:
+              deploy:
+                steps:
+                  - task: HelmInstaller@1
+                    displayName: "Install Helm 3"
+                    inputs:
+                      helmVersionToInstall: "3.13.3"
 
-          - task: HelmDeploy@0
-            displayName: "Helm upgrade --install (${{parameters.release_name}}) -> $(K8S_NAMESPACE)"
-            inputs:
-              connectionType: "Kubernetes Service Connection"
-              kubernetesServiceConnection: "luis-aks-dev"
-              namespace: "${{parameters.k8s_namespace}}"
-              command: "upgrade"
-              chartType: "FilePath"
-              chartPath: "${{parameters.chart_path}}"
-              releaseName: "${{parameters.release_name}}"
-              install: true
-              valueFile: "${{parameters.values_file}}"
-              arguments: >
-                --set image.repository=luistickts.azurecr.io/${{parameters.image_name}}
-                --set image.tag=$(Build.BuildId)
+                  - task: HelmDeploy@0
+                    displayName: "Helm upgrade --install (${{parameters.release_name}}) -> $(K8S_NAMESPACE)"
+                    inputs:
+                      connectionType: "Kubernetes Service Connection"
+                      kubernetesServiceConnection: "luis-aks-dev"
+                      namespace: "${{parameters.k8s_namespace}}"
+                      command: "upgrade"
+                      chartType: "FilePath"
+                      chartPath: "${{parameters.chart_path}}"
+                      releaseName: "${{parameters.release_name}}"
+                      install: true
+                      valueFile: "${{parameters.values_file}}"
+                      arguments: >
+                        --set image.repository=luistickts.azurecr.io/${{parameters.image_name}}
+                        --set image.tag=$(Build.BuildId)

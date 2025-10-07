@@ -9,4 +9,6 @@ stages:
       release_name: 'demoapi'
       chart_path: './helm/app'
       values_file: './api/LuisDev.DemoApp/LuisDev.DemoApp/cicd/demoapp.helm.yaml'
-      k8s_namespace: 'dev'
+      envs:
+      - 'dev'
+      - 'prod'
