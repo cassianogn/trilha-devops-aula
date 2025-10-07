@@ -12,6 +12,7 @@ stages:
         inputs:
           terraformVersion: 'latest'
       - task: TerraformTask@5
+        displayName: Init
         inputs:
           provider: 'azurerm'
           command: 'init'
@@ -21,14 +22,17 @@ stages:
           backendAzureRmContainerName: 'dev'
           backendAzureRmKey: 'envs/dev/terraform.tfstate'
       - task: TerraformTask@5
+        displayName: Plan
         inputs:
           provider: 'azurerm'
           command: 'plan'
           workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
           environmentServiceNameAzureRM: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
       - task: TerraformTask@5
+        displayName: Apply
         inputs:
           provider: 'azurerm'
           command: 'apply'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
           environmentServiceNameAzureRM: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
       
