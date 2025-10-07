@@ -1,0 +1,119 @@
+# .azure-pipelines/pr-dotnet.yml
+# Pipeline para PRs de app .NET no Azure DevOps (repo GitHub)
+# Build + Test + Lint/Format + Cobertura + Artefato
+
+name: pr-$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger: none   # não roda em push normal
+pr:
+  branches:
+    include:
+      - tests
+  paths:
+    include:
+      - api/LuisDev.DemoApp/**
+
+variables:
+  DOTNET_VERSION: '6.0.x'
+  BUILD_CONFIG: 'Release'
+  SOLUTION: './api/LuisDev.DemoApp/LuisDev.DemoApp.sln'
+  TEST_PROJECTS: './api/LuisDev.DemoApp/LuisDev.DemoApp.Tests/LuisDev.DemoApp.Tests.csproj'
+  WARN_AS_ERROR: 'true'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: PR
+  displayName: "Validate, Build & Test (.NET)"
+  jobs:
+  - job: build_and_test
+    displayName: "Build & Test"
+    steps:
+    - checkout: self
+      fetchDepth: 0
+
+    - task: UseDotNet@2
+      displayName: "Use .NET SDK $(DOTNET_VERSION)"
+      inputs:
+        packageType: 'sdk'
+        version: '$(DOTNET_VERSION)'
+
+    # Cache do NuGet baseado no global.json ou *.csproj lockfiles
+    - task: Cache@2
+      displayName: "Cache NuGet packages"
+      inputs:
+        key: 'nuget | "$(Agent.OS)" | **/packages.lock.json, **/nuget.config'
+        restoreKeys: |
+          nuget | "$(Agent.OS)"
+        path: ~/.nuget/packages
+
+    - script: dotnet --info
+      displayName: "Dotnet Info"
+
+    - script: dotnet restore $(SOLUTION)
+      displayName: "Restore"
+
+    # Checagem de formatação/estilo (falha se houver divergência)
+    # Requer dotnet-format (já embutido no SDK 7+ via 'dotnet format')
+    - script: dotnet format --verify-no-changes
+      displayName: "Code style check (dotnet format)"
+      continueOnError: false
+
+    # Build com warnings como erro (opcional)
+    - script: |
+        dotnet build $(SOLUTION) -c $(BUILD_CONFIG) --no-restore \
+        $(if $(WARN_AS_ERROR), -warnaserror)
+      displayName: "Build"
+
+    # Testes com cobertura (XPlat Code Coverage / cobertura)
+    - script: |
+        dotnet test $(TEST_PROJECTS) -c $(BUILD_CONFIG) --no-build \
+          /p:CollectCoverage=true \
+          /p:CoverletOutputFormat=cobertura \
+          /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/ \
+          --logger "trx;LogFileName=$(Build.SourcesDirectory)/TestResults/test_results.trx"
+      displayName: "Test with coverage"
+
+    # Publica resultados dos testes (TRX) na aba Tests do pipeline
+    - task: PublishTestResults@2
+      displayName: "Publish Test Results"
+      inputs:
+        testResultsFormat: 'VSTest'
+        testResultsFiles: '$(Build.SourcesDirectory)/TestResults/**/*.trx'
+        searchFolder: '$(Build.SourcesDirectory)'
+        failTaskOnFailedTests: true
+
+    # Gera relatório HTML de cobertura (opcional, mas legal no PR)
+    - script: |
+        dotnet tool install -g dotnet-reportgenerator-globaltool
+        export PATH="$PATH:~/.dotnet/tools"
+        reportgenerator \
+          -reports:"$(Build.SourcesDirectory)/TestResults/Coverage/**/coverage.cobertura.xml" \
+          -targetdir:"$(Build.SourcesDirectory)/CoverageReport" \
+          -reporttypes:"HtmlInline_AzurePipelines;Cobertura"
+      displayName: "Generate Coverage Report (HTML + Cobertura)"
+      condition: succeededOrFailed()
+
+    # Publica cobertura para a aba Code Coverage
+    - task: PublishCodeCoverageResults@2
+      displayName: "Publish Code Coverage (Cobertura)"
+      inputs:
+        codeCoverageTool: 'Cobertura'
+        summaryFileLocation: '$(Build.SourcesDirectory)/TestResults/Coverage/**/coverage.cobertura.xml'
+        reportDirectory: '$(Build.SourcesDirectory)/CoverageReport'
+        failIfCoverageEmpty: false
+
+    # Publica binários compilados como artefato do pipeline (útil no PR)
+    - script: |
+        dotnet publish $(SOLUTION) -c $(BUILD_CONFIG) -o $(Build.ArtifactStagingDirectory)/publish --nologo
+      displayName: "Publish (build output)"
+      condition: succeeded()
+
+    - task: PublishBuildArtifacts@1
+      displayName: "Upload artifact: drop"
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/publish'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
+      condition: succeededOrFailed()
