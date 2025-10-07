@@ -7,18 +7,13 @@ pr:
     include:
       - api/LuisDev.DemoApp/**
 
-variables:
-  DOTNET_VERSION:
-  SOLUTION:
-  TEST_PROJECTS:
-
 pool:
   vmImage: "ubuntu-latest"
 
 steps:
 - template: '../../base-pipelines/pr.pipeline.yaml'
   parameters:
-    dotnet_version: dotnet_version
-    soluttion_path: soluttion_path
-    test_project_path: test_project_path
+    dotnet_version:  "6.0.x"
+    soluttion_path:  "./api/LuisDev.DemoApp/LuisDev.DemoApp.sln"
+    test_project_path:  "./api/LuisDev.DemoApp/LuisDev.DemoApp.Tests/LuisDev.DemoApp.Tests.csproj"
  
