@@ -19,4 +19,11 @@ stages:
           backendServiceArm: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
           backendAzureRmStorageAccountName: 'aulasluis'
           backendAzureRmContainerName: 'dev'
-          backendAzureRmKey: 'tfstatedev.tfstate'
+          backendAzureRmKey: 'envs/dev/terraform.tfstate'
+      - task: TerraformTask@5
+        inputs:
+          provider: 'azurerm'
+          command: 'plan'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+          environmentServiceNameAzureRM: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
+      
