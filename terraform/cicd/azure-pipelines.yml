@@ -21,79 +21,36 @@ variables:
 steps:
 - checkout: self
 
-- task: TerraformInstaller@1
-  inputs:
-    terraformVersion: '1.6.6'
-
-# INIT (backend via access key)
 - task: TerraformTask@5
   displayName: 'Terraform init (access key)'
   inputs:
-    provider: 'azurerm'
-    command: 'init'
-    workingDirectory: '$(TF_WORKDIR)'
-    backendServiceArm: 'subcription laboratorio'
+    provider: azurerm
+    command: init
+    workingDirectory: $(TF_WORKDIR)
+    backendServiceArm: 'subcription laboratorio'   # NOVA SC (client secret)
     backendAzureRmResourceGroupName: 'laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
-    backendAzureRmContainerName: '$(STATE_CONTAINER)'   # -> dev
-    backendAzureRmKey: '$(STATE_KEY)'
-    commandOptions: >
-      -backend-config=access_key=$(STORAGE_KEY)
-      -upgrade
+    backendAzureRmContainerName: 'dev'
+    backendAzureRmKey: 'envs/$(ENV)/terraform.tfstate'
+    commandOptions: '-backend-config=access_key=$(STORAGE_KEY) -upgrade'
 
-- task: AzureCLI@2
-  displayName: 'Terraform plan (OIDC via ARM_*)'
+- task: TerraformTask@5
+  displayName: 'Terraform plan'
   inputs:
-    azureSubscription: 'subcription laboratorio'
-    addSpnToEnvironment: true
-    scriptType: bash
-    workingDirectory: '$(TF_WORKDIR)'
-    scriptLocation: inlineScript
-    inlineScript: |
-      set -e
-      export ARM_CLIENT_ID="$servicePrincipalId"
-      export ARM_TENANT_ID="$tenantId"
-      export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
-      export ARM_USE_OIDC=true
-      export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
+    provider: azurerm
+    command: plan
+    workingDirectory: $(TF_WORKDIR)
+    environmentServiceNameAzureRM: 'subcription laboratorio'  # mesma SC
+    commandOptions: '-var-file=$(TFVARS_PATH) -input=false -out=tfplan'
 
-      set +e
-      terraform plan -var-file="$(TFVARS_PATH)" -input=false -out=tfplan -detailed-exitcode
-      code=$?
-      set -e
-
-      if [ $code -eq 0 ]; then
-        echo "Sem mudanças."
-        echo "##vso[task.setvariable variable=TF_PLAN_HAS_CHANGES]false"
-        exit 0
-      elif [ $code -eq 2 ]; then
-        echo "Plan gerado com mudanças."
-        echo "##vso[task.setvariable variable=TF_PLAN_HAS_CHANGES]true"
-        exit 0
-      else
-        echo "Erro no terraform plan (exit $code)"
-        exit $code
-      fi
-      
-- task: AzureCLI@2
-  displayName: 'Terraform apply (OIDC via ARM_*)'
-  condition: eq(variables['TF_PLAN_HAS_CHANGES'], 'true')
+- task: TerraformTask@5
+  displayName: 'Terraform apply'
   inputs:
-    azureSubscription: 'subcription laboratorio'
-    addSpnToEnvironment: true
-    scriptType: bash
-    workingDirectory: '$(TF_WORKDIR)'
-    scriptLocation: inlineScript
-    inlineScript: |
-      set -e
-      # credenciais do provider azurerm (OIDC)
-      export ARM_CLIENT_ID="$servicePrincipalId"
-      export ARM_TENANT_ID="$tenantId"
-      export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
-      export ARM_USE_OIDC=true
-      export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
-
-      terraform apply -input=false -auto-approve tfplan
+    provider: azurerm
+    command: apply
+    workingDirectory: $(TF_WORKDIR)
+    environmentServiceNameAzureRM: 'subcription laboratorio'
+    commandOptions: '-input=false -auto-approve tfplan'
 # APPLY consumindo o plano
 # - task: AzureCLI@2
 #   displayName: 'Terraform apply (OIDC via ARM_*)'
