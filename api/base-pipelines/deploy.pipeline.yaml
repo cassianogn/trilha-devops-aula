@@ -40,8 +40,8 @@ stages:
             containerRegistry: 'luis-acr'
             repository: '${{parameters.image_name}}'
             command: 'buildAndPush'
-            Dockerfile: '${{dockerfile}}'
-            buildContext: ${{build_context}}
+            Dockerfile: '${{parameters.dockerfile}}'
+            buildContext: '${{parameters.build_context}}'
             tags: |
               ${{parameters.image_tag}}
               latest
