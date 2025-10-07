@@ -31,7 +31,7 @@ stages:
             displayName: "Tools info"
 
           - task: Docker@2
-            displayName: "Docker build & push (${{parameters.image_name}}:'$(Build.BuildId)' , latest)"
+            displayName: "Docker build & push (${{parameters.image_name}}:$(Build.BuildId) , latest)"
             inputs:
               containerRegistry: "luis-acr"
               repository: "${{parameters.image_name}}"
@@ -39,7 +39,7 @@ stages:
               Dockerfile: "${{parameters.dockerfile}}"
               buildContext: "${{parameters.build_context}}"
               tags: |
-                '$(Build.BuildId)' 
+                $(Build.BuildId)
                 latest
   - stage: deploy
     displayName: Deploy

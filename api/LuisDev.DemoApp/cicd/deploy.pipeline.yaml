@@ -6,7 +6,6 @@ stages:
     parameters:
       image_name: 'luistickts-api'                
       dockerfile: './api/LuisDev.DemoApp/LuisDev.DemoApp/Dockerfile'
-      build_context: '.'                           
       release_name: 'demoapi'
       chart_path: './helm/app'
       values_file: './api/LuisDev.DemoApp/LuisDev.DemoApp/cicd/demoapp.helm.yaml'
