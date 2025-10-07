@@ -1,11 +1,18 @@
-trigger: none
+trigger:
+  branches:
+    include:
+      - tests
+  paths:
+    include:
+      - terraform/**
+
 pr: none
 
 stages:
   - template: "deploy-template-pipeline.yml"
     parameters:
       envs:
-      - name: 'dev'
-        apply: false
-      - name: 'prod'
-        apply: true
+        - name: "dev"
+          apply: true
+        - name: "prod"
+          apply: true
