@@ -41,6 +41,7 @@ steps:
     workingDirectory: $(TF_WORKDIR)
     backendServiceArm: 'subcription laboratorio'
     environmentServiceNameAzureRM: 'subcription laboratorio'
+    backendAzureRmStorageAccountName: 'aulasluis'
 
 # PLAN
 # - task: TerraformTask@5
