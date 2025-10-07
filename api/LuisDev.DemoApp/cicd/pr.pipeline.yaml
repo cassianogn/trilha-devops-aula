@@ -44,5 +44,5 @@ steps:
      inputs:
        command: 'test'
        projects: '$(SOLUTION)'
-       arguments: '--configuration $(BUILD_CONFIG) --no-build --logger trx'
+       arguments: '--configuration $(BUILD_CONFIG) --logger trx'
        publishTestResults: true    # publica os TRX na aba "Tests"
