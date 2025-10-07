@@ -19,50 +19,57 @@ parameters:
     type: string
 
 stages:
-- stage: build
-  displayName: Build
-  pool:
-    vmImage: 'ubuntu-latest'
-  jobs:
-    - job: build
-      displayName: Build
-      steps:
-        - checkout: self
-          fetchDepth: 0
-        - script: |
-            docker version
-            helm version || true
-          displayName: "Tools info"
+  - stage: build
+    displayName: Build
+    pool:
+      vmImage: "ubuntu-latest"
+    jobs:
+      - job: build
+        displayName: Build
+        steps:
+          - checkout: self
+            fetchDepth: 0
+          - script: |
+              docker version
+              helm version || true
+            displayName: "Tools info"
 
-        - task: Docker@2
-          displayName: "Docker build & push (${{parameters.image_name}}:${{parameters.image_tag}}, latest)"
-          inputs:
-            containerRegistry: 'luis-acr'
-            repository: '${{parameters.image_name}}'
-            command: 'buildAndPush'
-            Dockerfile: '${{parameters.dockerfile}}'
-            buildContext: '${{parameters.build_context}}'
-            tags: |
-              ${{parameters.image_tag}}
-              latest
+          - task: Docker@2
+            displayName: "Docker build & push (${{parameters.image_name}}:${{parameters.image_tag}}, latest)"
+            inputs:
+              containerRegistry: "luis-acr"
+              repository: "${{parameters.image_name}}"
+              command: "buildAndPush"
+              Dockerfile: "${{parameters.dockerfile}}"
+              buildContext: "${{parameters.build_context}}"
+              tags: |
+                ${{parameters.image_tag}}
+                latest
+  - stage: deploy
+    displayName: Deploy
+    pool:
+      vmImage: "ubuntu-latest"
+    jobs:
+      - job: deploy
+        displayName: Deploy
+        steps:
+          - task: HelmInstaller@1
+            displayName: "Install Helm 3"
+            inputs:
+              helmVersionToInstall: "3.13.3"
 
-        - task: HelmInstaller@1
-          displayName: "Install Helm 3"
-          inputs:
-            helmVersionToInstall: '3.13.3'
-
-        - task: HelmDeploy@0
-          displayName: "Helm upgrade --install (${{parameters.release_name}}) -> $(K8S_NAMESPACE)"
-          inputs:
-            connectionType: 'Kubernetes Service Connection'
-            kubernetesServiceConnection: 'luis-aks-dev'
-            namespace: '${{parameters.k8s_namespace}}'
-            command: 'upgrade'
-            chartType: 'FilePath'
-            chartPath: '${{parameters.chart_path}}'
-            releaseName: '${{parameters.release_name}}'
-            install: true
-            valueFile: '${{parameters.values_file}}'
-            arguments: >
-              --set image.repository=${{parameters.acr_login_server}}/${{parameters.image_name}}
-              --set image.tag=${{parameters.image_tag}}
+          - task: HelmDeploy@0
+            displayName: "Helm upgrade --install (${{parameters.release_name}}) -> $(K8S_NAMESPACE)"
+            inputs:
+              connectionType: "Kubernetes Service Connection"
+              kubernetesServiceConnection: "luis-aks-dev"
+              namespace: "${{parameters.k8s_namespace}}"
+              command: "upgrade"
+              chartType: "FilePath"
+              chartPath: "${{parameters.chart_path}}"
+              releaseName: "${{parameters.release_name}}"
+              install: true
+              valueFile: "${{parameters.values_file}}"
+              arguments: >
+                --set image.repository=${{parameters.acr_login_server}}/${{parameters.image_name}}
+                --set image.tag=${{parameters.image_tag}}
