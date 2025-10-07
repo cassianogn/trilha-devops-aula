@@ -29,7 +29,9 @@ stages:
     pool:
       vmImage: ubuntu-latest
     jobs:
-      - job: deploy
+      - deployment: apply
+        displayName: apply
+        environment: prod
         variables:
           - group: "trilha-devops"
           - name: ENV
@@ -42,6 +44,9 @@ stages:
             value: "prod"
           - name: STATE_KEY
             value: "envs/$(ENV)/terraform.tfstate"
-        steps:
-          - checkout: self
-          - template: "deploy-template-pipeline.yml"
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                - template: "deploy-template-pipeline.yml"
