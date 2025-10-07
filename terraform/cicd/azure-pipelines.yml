@@ -23,18 +23,15 @@ steps:
 - task: TerraformTask@5
   displayName: 'Terraform init (AAD/OIDC)'
   inputs:
-    provider: 'azurerm'
-    command: 'init'
-    workingDirectory: '$(TF_WORKDIR)'
-    # use a MESMA Service Connection nas duas linhas abaixo:
+    provider: azurerm
+    command: init
+    workingDirectory: $(TF_WORKDIR)
     backendServiceArm: 'subcription laboratorio'
     environmentServiceNameAzureRM: 'subcription laboratorio'
-    # se você deixou o backend configurado no código, não precisa passar nada aqui.
-    # (opcional) se preferir passar aqui:
-    # backendAzureRmResourceGroupName: 'laboratorio'
-    # backendAzureRmStorageAccountName: 'aulasluis'
-    # backendAzureRmContainerName: 'tfstate'
-    # backendAzureRmKey: 'envs/$(ENV)/terraform.tfstate'
+    backendAzureRmResourceGroupName: 'laboratorio'
+    backendAzureRmStorageAccountName: 'aulasluis'
+    backendAzureRmContainerName: 'dev'                # use o que padronizou
+    backendAzureRmKey: 'envs/$(ENV)/terraform.tfstate' 
 
 # PLAN
 - task: TerraformTask@5
