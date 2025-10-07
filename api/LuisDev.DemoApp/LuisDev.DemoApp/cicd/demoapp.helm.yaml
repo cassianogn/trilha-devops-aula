@@ -3,7 +3,7 @@
 image:
   repository: luistickts.azurecr.io/luistickts-api
   pullPolicy: IfNotPresent
-  tag: "0"
+  tag: "latest"
 
 
 serviceAccount:
