@@ -1,3 +1,5 @@
+using LuisDev.DemoApp.Controllers;
+
 namespace LuisDev.DemoApp.Tests
 {
     public class UnitTest1
@@ -5,7 +7,9 @@ namespace LuisDev.DemoApp.Tests
         [Fact]
         public void Test1()
         {
-            Assert.True(false);
+            var test = new WeatherForecastController();
+            test.Get();
+            Assert.True(true);
         }
     }
 }
