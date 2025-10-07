@@ -1,12 +1,11 @@
 terraform {
   required_version = "~> 1.0"
 
-  backend "azurerm" {
+ backend "azurerm" {
     resource_group_name  = "laboratorio"
     storage_account_name = "aulasluis"
-    container_name       = "dev"                    
-    key                  = "envs/dev/terraform.tfstate"
-    use_azuread_auth     = true
+    container_name       = "tfstate"                    # padronize aqui
+    key                  = "envs/dev/terraform.tfstate" # ou envs/${var.env}/terraform.tfstate
   }
 
   required_providers {
@@ -18,7 +17,7 @@ terraform {
     azurerm = {
       source  = "hashicorp/azurerm"
       version = "~> 3.0"
-    }
+    }    
   }
 }
 
