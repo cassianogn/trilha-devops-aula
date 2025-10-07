@@ -47,7 +47,7 @@ steps:
 - task: HelmInstaller@1
   displayName: "Install Helm 3"
   inputs:
-    helmVersionToInstall: '3.x'
+    helmVersionToInstall: '3.13.3'
 
 # Helm upgrade/install no AKS
 - task: HelmDeploy@0
