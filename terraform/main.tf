@@ -29,8 +29,8 @@ locals {
 
 provider "azurerm" {
   features {}
-  use_oidc = true
 }
+
 resource "azurerm_resource_group" "app" {
   location = local.location
   name     = local.name
