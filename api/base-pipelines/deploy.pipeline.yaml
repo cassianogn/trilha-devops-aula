@@ -58,11 +58,11 @@ stages:
                       helmVersionToInstall: "3.13.3"
 
                   - task: HelmDeploy@0
-                    displayName: "Helm upgrade --install (${{parameters.release_name}}) -> $(K8S_NAMESPACE)"
+                    displayName: "Helm upgrade --install (${{parameters.release_name}}) -> ${{env}}"
                     inputs:
                       connectionType: "Kubernetes Service Connection"
                       kubernetesServiceConnection: "luis-aks-dev"
-                      namespace: "${{parameters.k8s_namespace}}"
+                      namespace: "${{env}}"
                       command: "upgrade"
                       chartType: "FilePath"
                       chartPath: "${{parameters.chart_path}}"
