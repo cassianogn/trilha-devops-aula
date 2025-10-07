@@ -39,7 +39,7 @@ steps:
     provider: azurerm
     command: init
     workingDirectory: $(TF_WORKDIR)
-    backendServiceArm: 'subcription laboratorio'
+    backendServiceArm:  'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
     environmentServiceNameAzureRM: 'subcription laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
     backendAzureRmContainerName: 'dev'
