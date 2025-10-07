@@ -1,9 +1,6 @@
 trigger:
 - main
 
-pool:
-  vmImage: 'ubuntu-latest'
-
 variables:
 - group: 'trilha-devops'             # contém STORAGE_KEY (secret)
 
@@ -18,7 +15,14 @@ variables:
 - name: STATE_KEY
   value: 'envs/$(ENV)/terraform.tfstate'
 
-steps:
-- checkout: self
-- template: 'deploy-template-pipeline.yml'
+stages:
+- stage: deployDev
+  displayName: deploy IAC - DEV
+  pool:
+    vmImage: ubunto-latest
+  jobs:
+  - job: deploy
+    steps:
+    - checkout: self
+    - template: 'deploy-template-pipeline.yml'
   
