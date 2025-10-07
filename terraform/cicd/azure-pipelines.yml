@@ -44,28 +44,36 @@ steps:
 - task: AzureCLI@2
   displayName: 'Terraform plan (OIDC via ARM_*)'
   inputs:
-    azureSubscription: 'subcription laboratorio'   # mesma SC do init
+    azureSubscription: 'subcription laboratorio'
     addSpnToEnvironment: true
     scriptType: bash
     workingDirectory: '$(TF_WORKDIR)'
     scriptLocation: inlineScript
     inlineScript: |
       set -e
-      # credenciais para o provider azurerm (OIDC)
       export ARM_CLIENT_ID="$servicePrincipalId"
       export ARM_TENANT_ID="$tenantId"
       export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
       export ARM_USE_OIDC=true
       export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
-      # opcional: se os providers já estão registrados
-      # export ARM_SKIP_PROVIDER_REGISTRATION=true
 
-      terraform providers
-      terraform plan \
-        -var-file="$(TFVARS_PATH)" \
-        -input=false \
-        -out=tfplan \
-        -detailed-exitcode
+      set +e
+      terraform plan -var-file="$(TFVARS_PATH)" -input=false -out=tfplan -detailed-exitcode
+      code=$?
+      set -e
+
+      if [ $code -eq 0 ]; then
+        echo "Sem mudanças."
+        echo "##vso[task.setvariable variable=TF_PLAN_HAS_CHANGES]false"
+        exit 0
+      elif [ $code -eq 2 ]; then
+        echo "Plan gerado com mudanças."
+        echo "##vso[task.setvariable variable=TF_PLAN_HAS_CHANGES]true"
+        exit 0
+      else
+        echo "Erro no terraform plan (exit $code)"
+        exit $code
+      fi
 
 # APPLY consumindo o plano
 # - task: AzureCLI@2
