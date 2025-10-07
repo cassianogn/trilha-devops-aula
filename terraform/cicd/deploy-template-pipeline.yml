@@ -1,18 +1,3 @@
-variables:
-- group: 'trilha-devops'             # contém STORAGE_KEY (secret)
-
-- name: ENV
-  value: 'dev'
-- name: TF_WORKDIR
-  value: '$(System.DefaultWorkingDirectory)/terraform'
-- name: TFVARS_PATH
-  value: 'envs/$(ENV).tfvars'        # relativo ao TF_WORKDIR
-- name: STATE_CONTAINER
-  value: 'dev'                       # <<< fixo
-- name: STATE_KEY
-  value: 'envs/$(ENV)/terraform.tfstate'
-
-  
 steps:
 - task: TerraformInstaller@1
   inputs:

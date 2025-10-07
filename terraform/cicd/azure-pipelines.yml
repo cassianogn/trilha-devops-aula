@@ -8,8 +8,19 @@ stages:
     vmImage: ubunto-latest
   jobs:
   - job: deploy
+    variables:
+    - group: 'trilha-devops'
+    - name: ENV
+      value: 'dev'
+    - name: TF_WORKDIR
+      value: '$(System.DefaultWorkingDirectory)/terraform'
+    - name: TFVARS_PATH
+      value: 'envs/$(ENV).tfvars'
+    - name: STATE_CONTAINER
+      value: 'dev'
+    - name: STATE_KEY
+      value: 'envs/$(ENV)/terraform.tfstate'
     steps:
     - checkout: self
     - template: 'deploy-template-pipeline.yml'
   
-    
