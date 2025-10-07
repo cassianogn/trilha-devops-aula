@@ -68,4 +68,4 @@ stages:
               valueFile: "${{parameters.values_file}}"
               arguments: >
                 --set image.repository=luistickts.azurecr.io/${{parameters.image_name}}
-                --set image.tag=${{parameters.image_tag}}
+                --set image.tag=$(Build.BuildId)
