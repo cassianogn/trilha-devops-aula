@@ -1,8 +1,6 @@
-# deploy-template-pipeline.yml
 parameters:
 - name: envs
   type: object
-  default: []   # ex.: [{ name: dev, apply: false }, { name: prod, apply: true }]
 
 stages:
 - ${{ each env in parameters.envs }}:
@@ -13,9 +11,9 @@ stages:
     jobs:
     - deployment: apply_${{ env.name }}
       displayName: "Apply ${{ env.name }}"
-      environment: ${{ env.name }}   # precisa existir como Environment no DevOps (se quiser approvals)
+      environment: ${{ env.name }}   
       variables:
-      - group: "trilha-devops"       # STORAGE_KEY no Variable Group
+      - group: "trilha-devops"       
       - name: TF_WORKDIR
         value: "$(System.DefaultWorkingDirectory)/terraform"
       - name: TFVARS_PATH
@@ -36,9 +34,8 @@ stages:
               inputs:
                 terraformVersion: "1.6.6"
 
-            # INIT (backend via access key)
             - task: TerraformTask@5
-              displayName: "Terraform init (access key)"
+              displayName: "Terraform init "
               inputs:
                 provider: "azurerm"
                 command: "init"
@@ -46,18 +43,15 @@ stages:
                 backendServiceArm: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
                 backendAzureRmResourceGroupName: "laboratorio"
                 backendAzureRmStorageAccountName: "aulasluis"
-                # Se você quiser container por ambiente, deixe abaixo como env.name.
-                # Se quiser manter fixo 'dev', troque para 'dev'.
                 backendAzureRmContainerName: "${{ env.name }}"
                 backendAzureRmKey: "$(STATE_KEY)"
                 commandOptions: >
                   -backend-config=access_key=$(STORAGE_KEY)
                   -upgrade
 
-            # PLAN (sempre roda)
             - ${{ if eq(env.apply, true) }}:
               - task: AzureCLI@2
-                displayName: "Terraform plan (OIDC via ARM_*)"
+                displayName: "Terraform plan"
                 inputs:
                   azureSubscription: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
                   addSpnToEnvironment: true
@@ -90,20 +84,20 @@ stages:
                       exit $code
                     fi
 
-            - task: AzureCLI@2
-              displayName: "Terraform apply (OIDC via ARM_*)"
-              condition: eq(variables['TF_PLAN_HAS_CHANGES'], 'true')
-              inputs:
-                azureSubscription: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
-                addSpnToEnvironment: true
-                scriptType: bash
-                workingDirectory: "$(TF_WORKDIR)"
-                scriptLocation: inlineScript
-                inlineScript: |
-                  set -e
-                  export ARM_CLIENT_ID="$servicePrincipalId"
-                  export ARM_TENANT_ID="$tenantId"
-                  export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
-                  export ARM_USE_OIDC=true
-                  export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
-                  terraform apply -input=false -auto-approve tfplan
+              - task: AzureCLI@2
+                displayName: "Terraform apply"
+                condition: eq(variables['TF_PLAN_HAS_CHANGES'], 'true')
+                inputs:
+                  azureSubscription: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
+                  addSpnToEnvironment: true
+                  scriptType: bash
+                  workingDirectory: "$(TF_WORKDIR)"
+                  scriptLocation: inlineScript
+                  inlineScript: |
+                    set -e
+                    export ARM_CLIENT_ID="$servicePrincipalId"
+                    export ARM_TENANT_ID="$tenantId"
+                    export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+                    export ARM_USE_OIDC=true
+                    export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
+                    terraform apply -input=false -auto-approve tfplan
