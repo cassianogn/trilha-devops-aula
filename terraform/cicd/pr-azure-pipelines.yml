@@ -1,16 +1,11 @@
 trigger: none
 
-pr:
-  branches:
-    include:
-      - tests
-  paths:
-    include:
-      - terraform/**
-
 stages:
-  - template: "deploy-template-pipeline.yml"
-    parameters:
-      envs:
-      - name: 'dev'
-        apply: false
+ - stage: terraform_pr
+   displayName: terraform Pr
+   pool:
+    vmImage: ubuntu-latest
+   jobs:
+   - job: terraform_pr
+     steps:
+      - 
