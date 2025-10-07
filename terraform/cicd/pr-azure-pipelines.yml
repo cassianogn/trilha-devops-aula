@@ -8,4 +8,15 @@ stages:
    jobs:
    - job: terraform_pr
      steps:
-      - 
+      - task: TerraformInstaller@1
+        inputs:
+          terraformVersion: 'latest'
+      - task: TerraformTask@5
+        inputs:
+          provider: 'azurerm'
+          command: 'init'
+          workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+          backendServiceArm: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
+          backendAzureRmStorageAccountName: 'aulasluis'
+          backendAzureRmContainerName: 'dev'
+          backendAzureRmKey: 'tfstatedev.tfstate'
