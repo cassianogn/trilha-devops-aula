@@ -11,7 +11,7 @@ stages:
     jobs:
       - deployment: apply
         displayName: apply
-        environment: prod
+        environment: ${{env}}
         variables:
           - group: "trilha-devops"
           - name: TF_WORKDIR
