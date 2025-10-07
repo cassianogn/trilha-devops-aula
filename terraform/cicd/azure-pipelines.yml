@@ -1,26 +1,47 @@
 trigger:
-- main
+  - main
 
 stages:
-- stage: deployDev
-  displayName: deploy IAC - DEV
-  pool:
-    vmImage: ubuntu-latest
-  jobs:
-  - job: deploy
-    variables:
-    - group: 'trilha-devops'
-    - name: ENV
-      value: 'dev'
-    - name: TF_WORKDIR
-      value: '$(System.DefaultWorkingDirectory)/terraform'
-    - name: TFVARS_PATH
-      value: 'envs/$(ENV).tfvars'
-    - name: STATE_CONTAINER
-      value: 'dev'
-    - name: STATE_KEY
-      value: 'envs/$(ENV)/terraform.tfstate'
-    steps:
-    - checkout: self
-    - template: 'deploy-template-pipeline.yml'
-  
+  - stage: deployDev
+    displayName: deploy IAC - DEV
+    pool:
+      vmImage: ubuntu-latest
+    jobs:
+      - job: deploy
+        variables:
+          - group: "trilha-devops"
+          - name: ENV
+            value: "dev"
+          - name: TF_WORKDIR
+            value: "$(System.DefaultWorkingDirectory)/terraform"
+          - name: TFVARS_PATH
+            value: "envs/$(ENV).tfvars"
+          - name: STATE_CONTAINER
+            value: "dev"
+          - name: STATE_KEY
+            value: "envs/$(ENV)/terraform.tfstate"
+        steps:
+          - checkout: self
+          - template: "deploy-template-pipeline.yml"
+
+  - stage: deployProd
+    displayName: deploy IAC - Prod
+    pool:
+      vmImage: ubuntu-latest
+    jobs:
+      - job: deploy
+        variables:
+          - group: "trilha-devops"
+          - name: ENV
+            value: "prod"
+          - name: TF_WORKDIR
+            value: "$(System.DefaultWorkingDirectory)/terraform"
+          - name: TFVARS_PATH
+            value: "envs/$(ENV).tfvars"
+          - name: STATE_CONTAINER
+            value: "prod"
+          - name: STATE_KEY
+            value: "envs/$(ENV)/terraform.tfstate"
+        steps:
+          - checkout: self
+          - template: "deploy-template-pipeline.yml"
