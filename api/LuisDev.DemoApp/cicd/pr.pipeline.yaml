@@ -5,7 +5,7 @@ pr:
       - tests # PRs cujo ALVO é 'tests'
   paths:
     include:
-      - api/LuisDev.DemoApp/** # mantém seu filtro de path
+      - api/LuisDev.DemoApp/**
 
 variables:
   DOTNET_VERSION: "6.0.x"
@@ -43,6 +43,6 @@ steps:
      displayName: "Test"
      inputs:
        command: 'test'
-       projects: '$(TEST_PROJECTS)'
+       projects: '$(SOLUTION)'
        arguments: '--configuration $(BUILD_CONFIG) --no-build --logger trx'
        publishTestResults: true    # publica os TRX na aba "Tests"
