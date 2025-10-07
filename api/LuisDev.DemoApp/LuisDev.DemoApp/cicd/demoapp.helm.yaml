@@ -1,7 +1,7 @@
 
 
 image:
-  repository: luisticktes.azurecr.io/luisticktes-api
+  repository: luistickts.azurecr.io/luistickts-api
   pullPolicy: IfNotPresent
   tag: "0"
 
