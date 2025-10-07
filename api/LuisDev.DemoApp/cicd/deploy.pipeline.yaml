@@ -1,26 +1,10 @@
 trigger: none
 pr: none
 
-variables:
-  # ---- Docker/ACR ----
-  ACR_LOGIN_SERVER: 'luistickts.azurecr.io'   # login server do seu ACR
-  IMAGE_NAME: 'luistickts-api'                # repositório no ACR
-  IMAGE_TAG: '$(Build.BuildId)'                # tag única por build
-  DOCKERFILE: './api/LuisDev.DemoApp/LuisDev.DemoApp/Dockerfile'
-  BUILD_CONTEXT: '.'                           # build a partir da raiz do repo
-
-  # ---- Helm/Chart ----
-  RELEASE_NAME: 'demoapi'
-  CHART_PATH: './helm/app'
-  VALUES_FILE: './api/LuisDev.DemoApp/LuisDev.DemoApp/cicd/demoapp.helm.yaml'
-  K8S_NAMESPACE: 'dev'
-
 stages:
   - template: '../../base-pipelines/deploy.pipeline.yaml'
     parameters:
-      acr_login_server: 'luistickts.azurecr.io'   
       image_name: 'luistickts-api'                
-      image_tag: '$(Build.BuildId)'                
       dockerfile: './api/LuisDev.DemoApp/LuisDev.DemoApp/Dockerfile'
       build_context: '.'                           
       release_name: 'demoapi'

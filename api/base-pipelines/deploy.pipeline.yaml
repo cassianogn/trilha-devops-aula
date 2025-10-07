@@ -1,9 +1,5 @@
 parameters:
-  - name: acr_login_server
-    type: string
   - name: image_name
-    type: string
-  - name: image_tag
     type: string
   - name: dockerfile
     type: string
@@ -35,7 +31,7 @@ stages:
             displayName: "Tools info"
 
           - task: Docker@2
-            displayName: "Docker build & push (${{parameters.image_name}}:${{parameters.image_tag}}, latest)"
+            displayName: "Docker build & push (${{parameters.image_name}}:'$(Build.BuildId)' , latest)"
             inputs:
               containerRegistry: "luis-acr"
               repository: "${{parameters.image_name}}"
@@ -43,7 +39,7 @@ stages:
               Dockerfile: "${{parameters.dockerfile}}"
               buildContext: "${{parameters.build_context}}"
               tags: |
-                ${{parameters.image_tag}}
+                '$(Build.BuildId)' 
                 latest
   - stage: deploy
     displayName: Deploy
@@ -71,5 +67,5 @@ stages:
               install: true
               valueFile: "${{parameters.values_file}}"
               arguments: >
-                --set image.repository=${{parameters.acr_login_server}}/${{parameters.image_name}}
+                --set image.repository=luistickts.azurecr.io/${{parameters.image_name}}
                 --set image.tag=${{parameters.image_tag}}
