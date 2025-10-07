@@ -20,7 +20,10 @@ variables:
 
 steps:
 - checkout: self
-
+- task: TerraformInstaller@1
+  displayName: 'Install Terraform'
+  inputs:
+    terraformVersion: '1.6.6'
 - task: TerraformTask@5
   displayName: 'Terraform init (access key)'
   inputs:
