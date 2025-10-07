@@ -5,8 +5,8 @@ pr: none
 
 variables:
   # ---- Docker/ACR ----
-  ACR_LOGIN_SERVER: 'luisticktes.azurecr.io'   # login server do seu ACR
-  IMAGE_NAME: 'luisticktes-api'                # repositório no ACR
+  ACR_LOGIN_SERVER: 'luistickts.azurecr.io'   # login server do seu ACR
+  IMAGE_NAME: 'luistickts-api'                # repositório no ACR
   IMAGE_TAG: '$(Build.BuildId)'                # tag única por build
   DOCKERFILE: './api/LuisDev.DemoApp/LuisDev.DemoApp/Dockerfile'
   BUILD_CONTEXT: '.'                           # build a partir da raiz do repo
