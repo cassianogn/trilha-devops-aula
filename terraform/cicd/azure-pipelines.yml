@@ -5,7 +5,7 @@ stages:
 - stage: deployDev
   displayName: deploy IAC - DEV
   pool:
-    vmImage: ubunto-latest
+    vmImage: ubuntu-latest
   jobs:
   - job: deploy
     variables:
