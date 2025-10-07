@@ -1,7 +1,7 @@
 parameters:
   - name: dotnet_version
     type: string
-  - name: soluttion_path
+  - name: solution_path
     type: string
   - name: test_project_path
     type: string
@@ -24,13 +24,13 @@ steps:
      displayName: "Restore"
      inputs:
        command: 'restore'
-       projects: '${{parameters.soluttion_path}}'
+       projects: '${{parameters.solution_path}}'
  
    - task: DotNetCoreCLI@2
      displayName: "Build"
      inputs:
        command: 'build'
-       projects: '${{parameters.soluttion_path}}'
+       projects: '${{parameters.solution_path}}'
        arguments: '--configuration Release --no-restore'
  
    - task: DotNetCoreCLI@2
