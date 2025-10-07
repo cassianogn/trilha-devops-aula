@@ -43,6 +43,6 @@ steps:
      displayName: "Test"
      inputs:
        command: 'test'
-       projects: '$(SOLUTION)'
+       projects: '$(TEST_PROJECTS)'
        arguments: '--configuration $(BUILD_CONFIG) --logger trx'
        publishTestResults: true    # publica os TRX na aba "Tests"
