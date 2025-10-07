@@ -3,96 +3,96 @@ parameters:
     type: object
 
 stages:
-  - ${{each env in parameters.envs}}
-  - stage: apply_terraform_${{env}}
-    displayName: apply terraform ${{env}}
-    pool:
-      vmImage: ubuntu-latest
-    jobs:
-      - deployment: apply
-        displayName: apply
-        environment: prod
-        variables:
-          - group: "trilha-devops"
-          - name: TF_WORKDIR
-            value: "$(System.DefaultWorkingDirectory)/terraform"
-          - name: TFVARS_PATH
-            value: "envs/${{env}}.tfvars"
-          - name: STATE_KEY
-            value: "envs/${{env}}/terraform.tfstate"
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - checkout: self
-                - task: TerraformInstaller@1
-                  inputs:
-                    terraformVersion: "1.6.6"
-                - task: TerraformTask@5
-                  displayName: "Terraform init (access key)"
-                  inputs:
-                    provider: "azurerm"
-                    command: "init"
-                    workingDirectory: "$(TF_WORKDIR)"
-                    backendServiceArm: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
-                    backendAzureRmResourceGroupName: "laboratorio"
-                    backendAzureRmStorageAccountName: "aulasluis"
-                    backendAzureRmContainerName: "${{env}}"
-                    backendAzureRmKey: "$(STATE_KEY)"
-                    commandOptions: >
-                      -backend-config=access_key=$(STORAGE_KEY)
-                      -upgrade
+- ${{each env in parameters.envs}}
+- stage: apply_terraform_${{env}}
+  displayName: apply terraform ${{env}}
+  pool:
+    vmImage: ubuntu-latest
+  jobs:
+    - deployment: apply
+      displayName: apply
+      environment: prod
+      variables:
+        - group: "trilha-devops"
+        - name: TF_WORKDIR
+          value: "$(System.DefaultWorkingDirectory)/terraform"
+        - name: TFVARS_PATH
+          value: "envs/${{env}}.tfvars"
+        - name: STATE_KEY
+          value: "envs/${{env}}/terraform.tfstate"
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - checkout: self
+              - task: TerraformInstaller@1
+                inputs:
+                  terraformVersion: "1.6.6"
+              - task: TerraformTask@5
+                displayName: "Terraform init (access key)"
+                inputs:
+                  provider: "azurerm"
+                  command: "init"
+                  workingDirectory: "$(TF_WORKDIR)"
+                  backendServiceArm: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
+                  backendAzureRmResourceGroupName: "laboratorio"
+                  backendAzureRmStorageAccountName: "aulasluis"
+                  backendAzureRmContainerName: "${{env}}"
+                  backendAzureRmKey: "$(STATE_KEY)"
+                  commandOptions: >
+                    -backend-config=access_key=$(STORAGE_KEY)
+                    -upgrade
 
-                - task: AzureCLI@2
-                  displayName: "Terraform plan (OIDC via ARM_*)"
-                  inputs:
-                    azureSubscription: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
-                    addSpnToEnvironment: true
-                    scriptType: bash
-                    workingDirectory: "$(TF_WORKDIR)"
-                    scriptLocation: inlineScript
-                    inlineScript: |
-                      set -e
-                      export ARM_CLIENT_ID="$servicePrincipalId"
-                      export ARM_TENANT_ID="$tenantId"
-                      export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
-                      export ARM_USE_OIDC=true
-                      export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
+              - task: AzureCLI@2
+                displayName: "Terraform plan (OIDC via ARM_*)"
+                inputs:
+                  azureSubscription: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
+                  addSpnToEnvironment: true
+                  scriptType: bash
+                  workingDirectory: "$(TF_WORKDIR)"
+                  scriptLocation: inlineScript
+                  inlineScript: |
+                    set -e
+                    export ARM_CLIENT_ID="$servicePrincipalId"
+                    export ARM_TENANT_ID="$tenantId"
+                    export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+                    export ARM_USE_OIDC=true
+                    export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
 
-                      set +e
-                      terraform plan -var-file="$(TFVARS_PATH)" -input=false -out=tfplan -detailed-exitcode
-                      code=$?
-                      set -e
+                    set +e
+                    terraform plan -var-file="$(TFVARS_PATH)" -input=false -out=tfplan -detailed-exitcode
+                    code=$?
+                    set -e
 
-                      if [ $code -eq 0 ]; then
-                        echo "Sem mudanças."
-                        echo "##vso[task.setvariable variable=TF_PLAN_HAS_CHANGES]false"
-                        exit 0
-                      elif [ $code -eq 2 ]; then
-                        echo "Plan gerado com mudanças."
-                        echo "##vso[task.setvariable variable=TF_PLAN_HAS_CHANGES]true"
-                        exit 0
-                      else
-                        echo "Erro no terraform plan (exit $code)"
-                        exit $code
-                      fi
+                    if [ $code -eq 0 ]; then
+                      echo "Sem mudanças."
+                      echo "##vso[task.setvariable variable=TF_PLAN_HAS_CHANGES]false"
+                      exit 0
+                    elif [ $code -eq 2 ]; then
+                      echo "Plan gerado com mudanças."
+                      echo "##vso[task.setvariable variable=TF_PLAN_HAS_CHANGES]true"
+                      exit 0
+                    else
+                      echo "Erro no terraform plan (exit $code)"
+                      exit $code
+                    fi
 
-              # - task: AzureCLI@2
-              #   displayName: 'Terraform apply (OIDC via ARM_*)'
-              #   condition: eq(variables['TF_PLAN_HAS_CHANGES'], 'true')
-              #   inputs:
-              #     azureSubscription: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
-              #     addSpnToEnvironment: true
-              #     scriptType: bash
-              #     workingDirectory: '$(TF_WORKDIR)'
-              #     scriptLocation: inlineScript
-              #     inlineScript: |
-              #       set -e
-              #       # credenciais do provider azurerm (OIDC)
-              #       export ARM_CLIENT_ID="$servicePrincipalId"
-              #       export ARM_TENANT_ID="$tenantId"
-              #       export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
-              #       export ARM_USE_OIDC=true
-              #       export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
+            # - task: AzureCLI@2
+            #   displayName: 'Terraform apply (OIDC via ARM_*)'
+            #   condition: eq(variables['TF_PLAN_HAS_CHANGES'], 'true')
+            #   inputs:
+            #     azureSubscription: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
+            #     addSpnToEnvironment: true
+            #     scriptType: bash
+            #     workingDirectory: '$(TF_WORKDIR)'
+            #     scriptLocation: inlineScript
+            #     inlineScript: |
+            #       set -e
+            #       # credenciais do provider azurerm (OIDC)
+            #       export ARM_CLIENT_ID="$servicePrincipalId"
+            #       export ARM_TENANT_ID="$tenantId"
+            #       export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+            #       export ARM_USE_OIDC=true
+            #       export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
 
-              #       terraform apply -input=false -auto-approve tfplan
+            #       terraform apply -input=false -auto-approve tfplan
