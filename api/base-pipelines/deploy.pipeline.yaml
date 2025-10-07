@@ -3,8 +3,7 @@ parameters:
     type: string
   - name: dockerfile
     type: string
-  - name: build_context
-    type: string
+  
   - name: release_name
     type: string
   - name: chart_path
@@ -37,7 +36,7 @@ stages:
               repository: "${{parameters.image_name}}"
               command: "buildAndPush"
               Dockerfile: "${{parameters.dockerfile}}"
-              buildContext: "${{parameters.build_context}}"
+              buildContext: "."
               tags: |
                 $(Build.BuildId)
                 latest
