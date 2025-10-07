@@ -9,6 +9,11 @@ parameters:
 steps:
    - checkout: self
 
+   - script: |
+      echo 'dotnet_version ${{parameters.dotnet_version}}'
+      echo 'solution_path ${{parameters.solution_path}}'
+      echo 'test_project_path ${{parameters.test_project_path}}'
+     displayName: debug
    - task: UseDotNet@2
      displayName: "Use .NET SDK ${{parameters.dotnet_version}}"
      inputs:
