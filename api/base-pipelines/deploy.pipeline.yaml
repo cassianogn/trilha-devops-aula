@@ -1,0 +1,70 @@
+
+
+parameters:
+  - name: acr_login_server
+    type: string
+  - name: image_name
+    type: string
+  - name: image_tag
+    type: string
+  - name: dockerfile
+    type: string
+  - name: build_context
+    type: string
+  - name: release_name
+    type: string
+  - name: chart_path
+    type: string
+  - name: values_file
+    type: string
+  - name: k8s_namespace
+    type: string
+
+stages:
+- stage: build
+  displayName: Build
+  pool:
+    vmImage: 'ubuntu-latest'
+  jobs:
+    - job: build
+      displayName: Build
+      steps:
+        - checkout: self
+          fetchDepth: 0
+        - script: |
+            docker version
+            helm version || true
+          displayName: "Tools info"
+
+        - task: Docker@2
+          displayName: "Docker build & push (${{parameters.image_name}}:${{parameters.image_tag}}, latest)"
+          inputs:
+            containerRegistry: 'luis-acr'
+            repository: '${{parameters.image_name}}'
+            command: 'buildAndPush'
+            Dockerfile: '${{dockerfile}}'
+            buildContext: '${{build_context}}'
+            tags: |
+              ${{parameters.image_tag}}
+              latest
+
+        - task: HelmInstaller@1
+          displayName: "Install Helm 3"
+          inputs:
+            helmVersionToInstall: '3.13.3'
+
+        - task: HelmDeploy@0
+          displayName: "Helm upgrade --install (${{parameters.release_name}}) -> $(K8S_NAMESPACE)"
+          inputs:
+            connectionType: 'Kubernetes Service Connection'
+            kubernetesServiceConnection: 'luis-aks-dev'
+            namespace: '${{parameters.k8s_namespace}}'
+            command: 'upgrade'
+            chartType: 'FilePath'
+            chartPath: '${{parameters.chart_path}}'
+            releaseName: '${{parameters.release_name}}'
+            install: true
+            valueFile: '${{parameters.values_file}}'
+            arguments: >
+              --set image.repository=${{parameters.acr_login_server}}/${{parameters.image_name}}
+              --set image.tag=${{parameters.image_tag}}

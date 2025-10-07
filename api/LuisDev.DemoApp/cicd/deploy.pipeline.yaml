@@ -1,5 +1,3 @@
-name: deploy-$(Date:yyyyMMdd)$(Rev:.r)
-
 trigger: none
 pr: none
 
@@ -17,51 +15,15 @@ variables:
   VALUES_FILE: './api/LuisDev.DemoApp/LuisDev.DemoApp/cicd/demoapp.helm.yaml'
   K8S_NAMESPACE: 'dev'
 
-pool:
-  vmImage: 'ubuntu-latest'
-
-steps:
-- checkout: self
-  fetchDepth: 0
-
-# (opcional) informações de versão das ferramentas
-- script: |
-    docker version
-    helm version || true
-  displayName: "Tools info"
-
-# Build + push para o ACR
-- task: Docker@2
-  displayName: "Docker build & push ($(IMAGE_NAME):$(IMAGE_TAG), latest)"
-  inputs:
-    containerRegistry: 'luis-acr'            # <— sua service connection do ACR
-    repository: '$(IMAGE_NAME)'               # NÃO inclua o registry aqui
-    command: 'buildAndPush'
-    Dockerfile: '$(DOCKERFILE)'
-    buildContext: '$(BUILD_CONTEXT)'
-    tags: |
-      $(IMAGE_TAG)
-      latest
-
-# Instala Helm 3
-- task: HelmInstaller@1
-  displayName: "Install Helm 3"
-  inputs:
-    helmVersionToInstall: '3.13.3'
-
-# Helm upgrade/install no AKS
-- task: HelmDeploy@0
-  displayName: "Helm upgrade --install ($(RELEASE_NAME)) -> $(K8S_NAMESPACE)"
-  inputs:
-    connectionType: 'Kubernetes Service Connection'
-    kubernetesServiceConnection: 'luis-aks-dev'   # <— sua service connection do AKS
-    namespace: '$(K8S_NAMESPACE)'
-    command: 'upgrade'
-    chartType: 'FilePath'
-    chartPath: '$(CHART_PATH)'
-    releaseName: '$(RELEASE_NAME)'
-    install: true
-    valueFile: '$(VALUES_FILE)'
-    arguments: >
-      --set image.repository=$(ACR_LOGIN_SERVER)/$(IMAGE_NAME)
-      --set image.tag=$(IMAGE_TAG)
+stages:
+  - template: '../../base-pipelines/deploy.pipeline.yaml'
+    parameters:
+      acr_login_server: 'luistickts.azurecr.io'   
+      image_name: 'luistickts-api'                
+      image_tag: '$(Build.BuildId)'                
+      dockerfile: './api/LuisDev.DemoApp/LuisDev.DemoApp/Dockerfile'
+      build_context: '.'                           
+      release_name: 'demoapi'
+      chart_path: './helm/app'
+      values_file: './api/LuisDev.DemoApp/LuisDev.DemoApp/cicd/demoapp.helm.yaml'
+      k8s_namespace: 'dev'
