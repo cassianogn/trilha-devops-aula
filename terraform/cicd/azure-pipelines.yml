@@ -5,5 +5,7 @@ stages:
   - template: "deploy-template-pipeline.yml"
     parameters:
       envs:
-      - 'dev'
-      - 'prod'
+      - name: 'dev'
+        apply: false
+      - name: 'prod'
+        apply: true
