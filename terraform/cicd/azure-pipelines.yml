@@ -5,12 +5,18 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
+- group: 'trilha-devops'             # contém STORAGE_KEY (secret)
+
 - name: ENV
   value: 'dev'
 - name: TF_WORKDIR
   value: '$(System.DefaultWorkingDirectory)/terraform'
 - name: TFVARS_PATH
-  value: 'envs/$(ENV).tfvars'   # relativo ao TF_WORKDIR
+  value: 'envs/$(ENV).tfvars'        # relativo ao TF_WORKDIR
+- name: STATE_CONTAINER
+  value: 'dev'                       # <<< fixo
+- name: STATE_KEY
+  value: 'envs/$(ENV)/terraform.tfstate'
 
 steps:
 - checkout: self
@@ -19,55 +25,45 @@ steps:
   inputs:
     terraformVersion: '1.6.6'
 
-# INIT (usa AAD/OIDC via Service Connection; sem access key)
-
-# - task: TerraformTask@5
-#   displayName: 'Terraform init (AAD/OIDC)'
-#   inputs:
-#     provider: azurerm
-#     command: init
-#     workingDirectory: $(TF_WORKDIR)
-#     backendServiceArm: 'subcription laboratorio'
-#     environmentServiceNameAzureRM: 'subcription laboratorio'
-#     backendAzureRmResourceGroupName: 'laboratorio'
-#     backendAzureRmStorageAccountName: 'aulasluis'
-#     backendAzureRmContainerName: 'dev'                # use o que padronizou
-#     backendAzureRmKey: 'envs/$(ENV)/'
+# INIT (backend via access key)
 - task: TerraformTask@5
-  displayName: 'Terraform init (AAD/OIDC)'
+  displayName: 'Terraform init (access key)'
   inputs:
-    provider: azurerm
-    command: init
-    workingDirectory: $(TF_WORKDIR)
-    backendServiceArm:  'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
-    environmentServiceNameAzureRM: 'subcription laboratorio'
+    provider: 'azurerm'
+    command: 'init'
+    workingDirectory: '$(TF_WORKDIR)'
+    backendServiceArm: 'subcription laboratorio'
+    backendAzureRmResourceGroupName: 'laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
-    backendAzureRmContainerName: 'dev'
-    backendAzureRmKey: 'envs/dev/terraform.tfstate'
+    backendAzureRmContainerName: '$(STATE_CONTAINER)'   # -> dev
+    backendAzureRmKey: '$(STATE_KEY)'
+    commandOptions: >
+      -backend-config=access_key=$(STORAGE_KEY)
+      -upgrade
 
 # PLAN
-# - task: TerraformTask@5
-#   displayName: 'Terraform plan'
-#   inputs:
-#     provider: 'azurerm'
-#     command: 'plan'
-#     workingDirectory: '$(TF_WORKDIR)'
-#     environmentServiceNameAzureRM: 'subcription laboratorio'
-#     commandOptions: >
-#       -var-file=$(TFVARS_PATH)
-#       -input=false
-#       -out=tfplan
-#     publishPlanResults: 'terraformPlan'
+- task: TerraformTask@5
+  displayName: 'Terraform plan'
+  inputs:
+    provider: 'azurerm'
+    command: 'plan'
+    workingDirectory: '$(TF_WORKDIR)'
+    environmentServiceNameAzureRM: 'subcription laboratorio'
+    commandOptions: >
+      -var-file=$(TFVARS_PATH)
+      -input=false
+      -out=tfplan
+    publishPlanResults: 'terraformPlan'
 
-# # APPLY
-# - task: TerraformTask@5
-#   displayName: 'Terraform apply'
-#   inputs:
-#     provider: 'azurerm'
-#     command: 'apply'
-#     workingDirectory: '$(TF_WORKDIR)'
-#     environmentServiceNameAzureRM: 'subcription laboratorio'
-#     commandOptions: >
-#       -input=false
-#       -auto-approve
-#       tfplan
+# APPLY
+- task: TerraformTask@5
+  displayName: 'Terraform apply'
+  inputs:
+    provider: 'azurerm'
+    command: 'apply'
+    workingDirectory: '$(TF_WORKDIR)'
+    environmentServiceNameAzureRM: 'subcription laboratorio'
+    commandOptions: >
+      -input=false
+      -auto-approve
+      tfplan
