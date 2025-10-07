@@ -42,6 +42,8 @@ steps:
     backendServiceArm: 'subcription laboratorio'
     environmentServiceNameAzureRM: 'subcription laboratorio'
     backendAzureRmStorageAccountName: 'aulasluis'
+    backendAzureRmContainerName: 'dev'
+    backendAzureRmKey: 'envs/dev/terraform.tfstate'
 
 # PLAN
 # - task: TerraformTask@5
