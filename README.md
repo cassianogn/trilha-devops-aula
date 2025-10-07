@@ -117,3 +117,39 @@ helm upgrade my-kube-prometheus-stack prometheus-community/kube-prometheus-stack
 kubectl get secret -n monitoring my-kube-prometheus-stack-grafana `
   -o jsonpath="{.data.admin-password}" | %{[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_))}
 ```
+
+## Trilha DevOps - Aula 3 de 4: Pipelines
+
+### Concedendo permissão para a Service Principal da pipeline (para criar Role Assignments)
+Antes de criar a pipeline, para o terraform poder executar corretamente, siga este guia:
+Este guia mostra:
+Como identificar qual Service Principal a sua pipeline do Azure DevOps está usando.
+Como dar acesso de administrador na subscription (ou no escopo desejado) para permitir que o Terraform crie Role Assignments (ex.: AcrPull no ACR).
+
+#### 1) Identificar a Service Principal usada pela pipeline
+Opção A — Pelo Azure DevOps (mais direto)
+No Azure DevOps, acesse Project settings → Service connections.
+Abra a Service Connection que a pipeline usa (o nome aparece no YAML, ex.: environmentServiceNameAzureRM e/ou backendServiceArm).
+Clique em Manage service principal / Manage App registration.
+No portal do Azure será aberta a Aplicação (App registration / Enterprise application). Anote:
+Application (client) ID
+Object ID
+Display name (nome da SP)
+Dica: o nome exibido nessa tela é exatamente a identidade que você deve escolher quando for atribuir a função (role) no IAM.
+Opção B — Pelo log da pipeline (se estiver usando OIDC com AzureCLI@2)
+Se você usa um passo AzureCLI@2 com addSpnToEnvironment: true, a pipeline exporta variáveis:
+servicePrincipalId → Application (client) ID
+tenantId → Tenant
+Esses valores também podem ser usados para localizar a SP no Entra ID.
+
+#### 2) Conceder permissão de User Access Administrator (ou Owner) na Subscription
+Por quê? Para criar roleAssignments (RBAC) via Terraform, a identidade que executa o apply precisa ter permissão de gravar RBAC no escopo alvo. As funções que permitem isso são User Access Administrator (recomendado para este caso) ou Owner.
+Onde? No escopo da Subscription é o modo mais simples quando RGs e recursos são criados pelo próprio Terraform (porque ainda não existem antes).
+2.1 Via Portal do Azure
+Acesse Assinaturas → selecione sua Subscription.
+Abra Controle de acesso (IAM) → Adicionar → Adicionar atribuição de função.
+Em Função, escolha User Access Administrator (ou Proprietário/Owner, se preferir).
+Em Membros, selecione Usuário, grupo ou entidade de serviço → Selecionar membros.
+Busque pelo nome da Service Principal (anotado na etapa 1) e selecione.
+Examinar + atribuir para concluir.
+Observação: a propagação do RBAC pode levar alguns minutos. Se ainda aparecer 403 logo depois, aguarde e tente novamente.
