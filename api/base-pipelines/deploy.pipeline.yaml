@@ -1,5 +1,3 @@
-
-
 parameters:
   - name: acr_login_server
     type: string
@@ -43,7 +41,7 @@ stages:
             repository: '${{parameters.image_name}}'
             command: 'buildAndPush'
             Dockerfile: '${{dockerfile}}'
-            buildContext: '${{build_context}}'
+            buildContext: ${{build_context}}
             tags: |
               ${{parameters.image_tag}}
               latest
