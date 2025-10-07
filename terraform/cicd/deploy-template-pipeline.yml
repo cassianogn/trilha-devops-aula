@@ -90,22 +90,20 @@ stages:
                       exit $code
                     fi
 
-              # APPLY (só se apply == true no item)
-              - ${{ if env.apply }}:
-                - task: AzureCLI@2
-                  displayName: "Terraform apply (OIDC via ARM_*)"
-                  condition: eq(variables['TF_PLAN_HAS_CHANGES'], 'true')
-                  inputs:
-                    azureSubscription: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
-                    addSpnToEnvironment: true
-                    scriptType: bash
-                    workingDirectory: "$(TF_WORKDIR)"
-                    scriptLocation: inlineScript
-                    inlineScript: |
-                      set -e
-                      export ARM_CLIENT_ID="$servicePrincipalId"
-                      export ARM_TENANT_ID="$tenantId"
-                      export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
-                      export ARM_USE_OIDC=true
-                      export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
-                      terraform apply -input=false -auto-approve tfplan
+              - task: AzureCLI@2
+                displayName: "Terraform apply (OIDC via ARM_*)"
+                condition: eq(variables['TF_PLAN_HAS_CHANGES'], 'true')
+                inputs:
+                  azureSubscription: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
+                  addSpnToEnvironment: true
+                  scriptType: bash
+                  workingDirectory: "$(TF_WORKDIR)"
+                  scriptLocation: inlineScript
+                  inlineScript: |
+                    set -e
+                    export ARM_CLIENT_ID="$servicePrincipalId"
+                    export ARM_TENANT_ID="$tenantId"
+                    export ARM_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+                    export ARM_USE_OIDC=true
+                    export ARM_OIDC_TOKEN_FILE="${AZURE_FEDERATED_TOKEN_FILE}"
+                    terraform apply -input=false -auto-approve tfplan
