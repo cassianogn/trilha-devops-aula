@@ -4,7 +4,7 @@ terraform {
   backend "azurerm" {}
   required_providers {
     azapi = {
-      source  = "azure/azapiaaaa"
+      source  = "azure/azapi"
       version = "~> 1.5"
     }
 
