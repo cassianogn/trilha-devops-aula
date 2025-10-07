@@ -34,14 +34,13 @@ steps:
 #     backendAzureRmContainerName: 'dev'                # use o que padronizou
 #     backendAzureRmKey: 'envs/$(ENV)/'
 - task: TerraformTask@5
+  displayName: 'Terraform init (AAD/OIDC)'
   inputs:
-    provider: 'azurerm'
-    command: 'init'
-    workingDirectory: '$(TF_WORKDIR)'
+    provider: azurerm
+    command: init
+    workingDirectory: $(TF_WORKDIR)
     backendServiceArm: 'subcription laboratorio'
-    backendAzureRmStorageAccountName: 'aulasluis'
-    backendAzureRmContainerName: 'dev'
-    backendAzureRmKey: 'final/terraform.tfstate'
+    environmentServiceNameAzureRM: 'subcription laboratorio'
 
 # PLAN
 # - task: TerraformTask@5
