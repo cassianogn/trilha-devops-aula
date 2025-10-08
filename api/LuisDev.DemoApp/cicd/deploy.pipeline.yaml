@@ -2,9 +2,9 @@ trigger:
   branches:
     include:
         - tests
-    paths:
-      include:
-        - api/**
+  paths:
+    include:
+      - api/**
 pr: none
   
 
