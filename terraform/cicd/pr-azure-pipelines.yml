@@ -1,73 +1,10 @@
 trigger: none
 
 stages:
-  - stage: terraform_pr_dev
-    displayName: terraform Pr Dev
-    pool:
-      vmImage: ubuntu-latest
-    jobs:
-      - deployment: terraform_pr_dev
-        environment: dev
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: TerraformInstaller@1
-                  inputs:
-                    terraformVersion: "latest"
-                - task: TerraformTask@5
-                  displayName: Init
-                  inputs:
-                    provider: "azurerm"
-                    command: "init"
-                    workingDirectory: "$(System.DefaultWorkingDirectory)/terraform"
-                    backendServiceArm: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
-                    backendAzureRmStorageAccountName: "aulasluis"
-                    backendAzureRmContainerName: "dev"
-                    backendAzureRmKey: "envs/dev/terraform.tfstate"
-                - task: TerraformTask@5
-                  displayName: Plan
-                  inputs:
-                    provider: "azurerm"
-                    command: "plan"
-                    workingDirectory: "$(System.DefaultWorkingDirectory)/terraform"
-                    environmentServiceNameAzureRM: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
-
-  - stage: terraform_pr_prod
-    displayName: terraform Pr Prod
-    pool:
-      vmImage: ubuntu-latest
-    jobs:
-      - deployment: terraform_pr_prod
-        environment: prod
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: TerraformInstaller@1
-                  inputs:
-                    terraformVersion: "latest"
-                - task: TerraformTask@5
-                  displayName: Init
-                  inputs:
-                    provider: "azurerm"
-                    command: "init"
-                    workingDirectory: "$(System.DefaultWorkingDirectory)/terraform"
-                    backendServiceArm: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
-                    backendAzureRmStorageAccountName: "aulasluis"
-                    backendAzureRmContainerName: "prod"
-                    backendAzureRmKey: "envs/prod/terraform.tfstate"
-                - task: TerraformTask@5
-                  displayName: Plan
-                  inputs:
-                    provider: "azurerm"
-                    command: "plan"
-                    workingDirectory: "$(System.DefaultWorkingDirectory)/terraform"
-                    environmentServiceNameAzureRM: "Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)"
-                # - task: TerraformTask@5
-                #   displayName: Apply
-                #   inputs:
-                #     provider: 'azurerm'
-                #     command: 'apply'
-                #     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
-                #     environmentServiceNameAzureRM: 'Azure subscription 1(093ea378-3099-4ff4-b2ec-b80dc1c14243)'
+  - template: "./deploy-template-pipeline.yml"
+    parameters:
+      envs:
+      - name: dev
+        apply: false
+      - name: prod
+        apply: false
