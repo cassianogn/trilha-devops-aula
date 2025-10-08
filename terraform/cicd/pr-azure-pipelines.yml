@@ -1,5 +1,13 @@
 trigger: none
 
+pr:
+  branches:
+    include:
+      - test
+  paths:
+    include:
+      - terraform/**
+
 stages:
   - template: "./deploy-template-pipeline.yml"
     parameters:
@@ -7,10 +15,6 @@ stages:
       - name: dev
         apply: false
       - name: prod
-        apply: false
-      - name: abobrinha
-        apply: false
-      - name: feijao
         apply: false
 
       
