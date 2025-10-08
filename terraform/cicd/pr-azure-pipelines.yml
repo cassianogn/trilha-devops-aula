@@ -8,3 +8,9 @@ stages:
         apply: false
       - name: prod
         apply: false
+      - name: abobrinha
+        apply: false
+      - name: feijao
+        apply: false
+
+      
