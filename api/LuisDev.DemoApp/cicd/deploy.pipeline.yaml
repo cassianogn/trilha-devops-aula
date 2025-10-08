@@ -1,12 +1,12 @@
-trigger: none
-
-pr:
+trigger: 
   branches:
     include:
-      - tests
-  paths:
-    include:
-      - api/**
+        - tests
+    paths:
+      include:
+        - api/**
+pr: none
+  
 
 stages:
   - template: '../../base-pipelines/deploy.pipeline.yaml'
