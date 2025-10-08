@@ -17,7 +17,7 @@ terraform {
 
 locals {
   location = "Canada East"
-  name     = "luis-tickts"
+  name     = "luis-ticktss"
 }
 
 provider "azurerm" {
